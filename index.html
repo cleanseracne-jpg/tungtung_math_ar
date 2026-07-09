@@ -178,10 +178,10 @@
         let isHandDetected = false;
         let isWebcamActive = false; 
 
-        // ตำแหน่งของตัวละครทุงทุง
-        const tungBase = { x: 600, y: 560 }; 
+        // ปรับตำแหน่งทุงทุงให้สูงขึ้น เพื่อให้มีพื้นที่ดึงถอยหลังบนมือถือ
+        const tungBase = { x: 600, y: 480 }; 
         // อ็อบเจกต์ท่อนไม้ สำหรับปา
-        let stickObj = { x: 600, y: 560, r: 40, vx: 0, vy: 0, isGrabbed: false, isFired: false, scale: 1, rotation: 0 };
+        let stickObj = { x: 600, y: 480, r: 40, vx: 0, vy: 0, isGrabbed: false, isFired: false, scale: 1, rotation: 0 };
         let targets = []; 
 
         function resizeCanvas() {
@@ -250,7 +250,8 @@
                 uiMathTitle.classList.replace('text-pink-400', 'text-yellow-300');
             }
 
-            const positions = [ { x: 300, y: 180 }, { x: 600, y: 180 }, { x: 900, y: 180 } ];
+            // ขยับเป้าหมายให้สูงขึ้นนิดหน่อย สัมพันธ์กับทุงทุงที่ขยับขึ้น
+            const positions = [ { x: 300, y: 150 }, { x: 600, y: 150 }, { x: 900, y: 150 } ];
             targets = qData.options.map((opt, i) => {
                 let type = Math.floor(Math.random() * 3) + 1; 
                 return {
@@ -287,7 +288,8 @@
             if (stickObj.isGrabbed) {
                 const dx = pos.x - tungBase.x; const dy = pos.y - tungBase.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const maxStretch = 180; // ดึงถอยหลังได้สูงสุด
+                // ลดระยะดึงถอยหลังสูงสุด เพื่อไม่ให้หลุดจอบนมือถือ (จาก 180 เป็น 130)
+                const maxStretch = 130; 
                 if (dist > maxStretch) {
                     stickObj.x = tungBase.x + (dx / dist) * maxStretch;
                     stickObj.y = tungBase.y + (dy / dist) * maxStretch;
