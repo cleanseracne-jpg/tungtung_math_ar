@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TungTung Math AR (สูตรคูณทะลุจอ สไตล์ทุงทุง)</title>
+    <title>TungTung Math AR (สูตรคูณทะลุจอ สไตล์ทุงทุง ซาฮูรา)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -27,12 +27,12 @@
 
     <!-- หน้าแรก: ใช้พื้นหลัง bg-start.png -->
     <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50 bg-cover bg-center bg-no-repeat" style="background-image: url('images/bg-start.png'); background-color: #f97316;">
-        <div class="glass p-8 rounded-3xl text-center max-w-lg shadow-2xl mx-4 border-2 border-white/50 bg-black/40">
+        <div class="glass p-8 rounded-3xl text-center max-w-lg shadow-2xl mx-4 border-2 border-white/50 bg-black/50">
             <h1 class="text-4xl md:text-5xl font-black mb-3 drop-shadow-lg text-yellow-300">🪵 TungTung Math AR</h1>
-            <p class="text-xl font-bold mb-6 text-white drop-shadow-md">ศึกทุงทุง ปาไม้ทายสูตรคูณ (แม่ 2-12)</p>
-            <div class="text-left bg-black/50 p-5 rounded-2xl mb-6 text-sm space-y-3 text-orange-50 border border-white/20">
-                <p>🎯 <b>ภารกิจ:</b> ช่วยทุงทุงปาไม้ใส่แก๊งมอนสเตอร์ตัวที่ถือคำตอบถูกต้อง</p>
-                <p>⏳ <b>เวลา:</b> มี 20 ข้อ (ข้อละ 30 วินาที) โบนัส 3 ข้อ (1.30 นาที)</p>
+            <p class="text-xl font-bold mb-6 text-white drop-shadow-md">ศึกทุงทุง ปาไม้ทายสูตรคูณ</p>
+            <div class="text-left bg-black/60 p-5 rounded-2xl mb-6 text-sm space-y-3 text-orange-50 border border-white/20">
+                <p>🎯 <b>ภารกิจ:</b> ช่วยทุงทุงปาไม้ใส่แก๊งตัวประหลาดที่ถือคำตอบถูกต้อง</p>
+                <p>⏳ <b>เวลา:</b> มี 20 ข้อ (ปกติ 30 วิ/ข้อ) โบนัส 3 ข้อ (90 วิ/ข้อ)</p>
                 <p>🖐️ <b>วิธีเล่น (AR):</b> ใช้ <b>นิ้วโป้งและนิ้วชี้จีบเข้าหากัน</b> เพื่อหยิบไม้ ดึงถอยหลัง แล้วปล่อยเพื่อปา! (ใช้เมาส์ลากยิงแทนได้)</p>
             </div>
             <button id="btn-start" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-400 hover:to-orange-400 text-white font-black text-2xl py-4 rounded-2xl transition shadow-[0_0_15px_rgba(251,146,60,0.8)] transform hover:scale-105 cursor-pointer">
@@ -47,7 +47,7 @@
 
         <div class="absolute top-4 left-4 right-4 z-30 flex justify-between items-center pointer-events-none">
             <!-- สถานะข้อและคะแนน -->
-            <div class="glass px-5 py-2 rounded-2xl flex items-center space-x-4 bg-black/30">
+            <div class="glass px-5 py-2 rounded-2xl flex items-center space-x-4 bg-black/40">
                 <div>
                     <div class="text-[10px] text-yellow-200 uppercase tracking-wider font-bold">ข้อที่</div>
                     <div id="ui-question-number" class="text-2xl font-black text-white">1 / 20</div>
@@ -61,28 +61,27 @@
 
             <!-- ป้ายคำถาม (ใช้พื้นหลัง ui-board.png) -->
             <div class="relative px-12 py-5 text-center min-w-[280px] bg-contain bg-center bg-no-repeat drop-shadow-xl" style="background-image: url('images/ui-board.png');">
-                <!-- แบ็คอัพสีดำใสกรณีรูปยังไม่มา -->
-                <div class="absolute inset-0 bg-black/40 rounded-2xl -z-10" style="backdrop-filter: blur(4px);"></div>
-                <div id="ui-math-title" class="text-xs text-yellow-300 font-bold mb-1 drop-shadow">แก๊งทุงทุงบุก!</div>
+                <div class="absolute inset-0 bg-black/30 rounded-2xl -z-10" style="backdrop-filter: blur(2px);"></div>
+                <div id="ui-math-title" class="text-xs text-yellow-300 font-bold mb-1 drop-shadow-md">แก๊งทุงทุงบุก!</div>
                 <div id="ui-math-question" class="text-4xl font-black text-white drop-shadow-lg">⌛ โหลด...</div>
             </div>
 
             <!-- จับเวลา -->
-            <div class="glass px-5 py-2 rounded-2xl text-right bg-black/30">
+            <div class="glass px-5 py-2 rounded-2xl text-right bg-black/40">
                 <div class="text-[10px] text-yellow-200 uppercase tracking-wider font-bold">เวลาที่เหลือ</div>
                 <div id="ui-timer" class="text-2xl font-black text-pink-400">00:30</div>
             </div>
         </div>
 
-        <div id="ai-loading-status" class="absolute bottom-4 left-4 z-30 glass px-4 py-2 rounded-xl text-xs flex items-center space-x-2 text-yellow-300 bg-black/50 pointer-events-none">
+        <div id="ai-loading-status" class="absolute bottom-4 left-4 z-30 glass px-4 py-2 rounded-xl text-xs flex items-center space-x-2 text-yellow-300 bg-black/60 pointer-events-none">
             <span class="animate-ping inline-block w-2 h-2 rounded-full bg-yellow-400"></span>
             <span id="status-text" class="font-bold">ตรวจสอบระบบควบคุม...</span>
         </div>
     </div>
 
-    <!-- หน้าจอสรุปผล (สลับพื้นหลังอัตโนมัติตอนจบเกม) -->
+    <!-- หน้าจอสรุปผล (สลับภาพอัตโนมัติตามผลลัพธ์) -->
     <div id="game-over-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50 bg-cover bg-center bg-no-repeat hidden">
-        <div class="glass p-10 rounded-3xl text-center max-w-md shadow-2xl mx-4 border-2 border-white/50 bg-black/60">
+        <div class="glass p-10 rounded-3xl text-center max-w-md shadow-2xl mx-4 border-2 border-white/50 bg-black/70">
             <h2 id="summary-title" class="text-4xl font-black mb-2 text-yellow-400 drop-shadow-lg">...</h2>
             <p id="summary-sub" class="text-lg text-white mb-6 font-bold">...</p>
             
@@ -119,7 +118,7 @@
         const btnStart = document.getElementById('btn-start');
         const btnRestart = document.getElementById('btn-restart');
 
-        // --- โหลดรูปภาพกราฟิก ทุงทุง ซาฮูรา ทั้งหมดตาม Directory ---
+        // --- โหลดรูปภาพกราฟิกทั้งหมด (เป็นนามสกุล .png ทุกภาพ) ---
         const images = {
             main: new Image(), stick: new Image(),
             target1: new Image(), target2: new Image(), target3: new Image(),
@@ -135,14 +134,15 @@
         images.target3.src = 'images/tung-target-3.png';
         images.correct.src = 'images/effect-correct.png';
         images.wrong.src = 'images/effect-wrong.png';
-        // หมวด 2: ฉากหลัง (Canvas)
+        
+        // หมวด 2: ฉากหลัง
         images.bgNormal.src = 'images/bg-normal.png';
         images.bgBonus.src = 'images/bg-bonus.png';
+        
         // หมวด 3: UI
         images.badge.src = 'images/ui-badge.png';
         images.cursor.src = 'images/ui-cursor.png';
 
-        // สถานะเกม
         let gameState = 'START'; 
         let score = 0;
         let currentQuestionIdx = 0;
@@ -153,14 +153,14 @@
         let totalTimeSpent = 0;
         let isBonusRound = false;
 
-        // ระบบพิกัด AR Cursor
         let cursor = { x: 0, y: 0, isPinching: false, state: 'NORMAL' };
         let isHandDetected = false;
         let isWebcamActive = false; 
 
-        // ระบบฟิสิกส์: ตำแหน่งตัวทุงทุง และ ท่อนไม้
-        const tungBase = { x: 600, y: 550 };
-        let stickObj = { x: 600, y: 550, r: 35, vx: 0, vy: 0, isGrabbed: false, isFired: false, scale: 1, rotation: 0 };
+        // ตำแหน่งของตัวละครทุงทุง
+        const tungBase = { x: 600, y: 560 }; 
+        // อ็อบเจกต์ท่อนไม้ สำหรับปา
+        let stickObj = { x: 600, y: 560, r: 40, vx: 0, vy: 0, isGrabbed: false, isFired: false, scale: 1, rotation: 0 };
         let targets = []; 
 
         function resizeCanvas() {
@@ -171,7 +171,7 @@
 
         function generateMathQuestions() {
             let list = [];
-            // โบนัสออกข้อที่ 5, 10, 15 (Index 4, 9, 14)
+            // โบนัสออกข้อ 5, 10, 15 (Index 4, 9, 14)
             let bonusIndices = new Set([4, 9, 14]);
 
             for (let i = 0; i < totalQuestions; i++) {
@@ -187,7 +187,6 @@
                 }
                 
                 answer = num1 * num2;
-                
                 let wrong1 = answer + (Math.random() > 0.5 ? num1 : -num1);
                 let wrong2 = answer + (Math.random() > 0.5 ? 10 : -10);
                 if (wrong1 === answer || wrong1 <= 0) wrong1 = answer + 7;
@@ -204,16 +203,12 @@
             return list;
         }
 
-        // นำไม้กลับมาใส่มือทุงทุง
         function resetStick() {
             stickObj.x = tungBase.x;
             stickObj.y = tungBase.y;
-            stickObj.vx = 0;
-            stickObj.vy = 0;
-            stickObj.scale = 1;
-            stickObj.rotation = 0;
-            stickObj.isGrabbed = false;
-            stickObj.isFired = false;
+            stickObj.vx = 0; stickObj.vy = 0;
+            stickObj.scale = 1; stickObj.rotation = 0;
+            stickObj.isGrabbed = false; stickObj.isFired = false;
         }
 
         function loadQuestion(idx) {
@@ -224,8 +219,7 @@
             const qData = questionsList[idx];
             uiMathQuestion.innerText = qData.text;
             isBonusRound = qData.isBonus;
-
-            gameTimeLeft = isBonusRound ? 90 : 30; // รีเซ็ตเวลา (โบนัส 90วิ ปกติ 30วิ)
+            gameTimeLeft = isBonusRound ? 90 : 30;
             
             if (isBonusRound) {
                 uiMathTitle.innerText = "🔥 ด่านโบนัส! (300 คะแนน) 🔥";
@@ -235,45 +229,35 @@
                 uiMathTitle.classList.replace('text-pink-400', 'text-yellow-300');
             }
 
-            const positions = [ { x: 300, y: 220 }, { x: 600, y: 220 }, { x: 900, y: 220 } ];
+            const positions = [ { x: 300, y: 180 }, { x: 600, y: 180 }, { x: 900, y: 180 } ];
             targets = qData.options.map((opt, i) => {
-                // สุ่มรูปร่างมอนสเตอร์ 1, 2 หรือ 3
                 let type = Math.floor(Math.random() * 3) + 1; 
                 return {
-                    x: positions[i].x, y: positions[i].y, r: 45,
+                    x: positions[i].x, y: positions[i].y, r: 50,
                     val: opt.value, isCorrect: opt.isCorrect, isHit: false, type: type,
-                    floatOffset: Math.random() * Math.PI * 2 // ลอยแบบสุ่มจังหวะ
+                    floatOffset: Math.random() * Math.PI * 2, // ตัวแปรสำหรับทำอนิเมชั่นลอยแยกอิสระ
+                    hitScale: 1.0, // ตัวแปรสำหรับขยายขนาดเอฟเฟกต์ระเบิด
+                    hitAlpha: 1.0  // ตัวแปรสำหรับจางหาย (Fade)
                 };
             });
-
             resetStick();
         }
 
         let isMouseDown = false;
-        canvasElement.addEventListener('mousedown', (e) => {
-            if (isHandDetected) return; 
-            isMouseDown = true; handlePointerDown(getMousePos(e));
-        });
-        canvasElement.addEventListener('mousemove', (e) => {
-            if (isHandDetected) return;
-            const pos = getMousePos(e);
-            cursor.x = pos.x; cursor.y = pos.y;
-            handlePointerMove(pos);
-        });
-        canvasElement.addEventListener('mouseup', (e) => {
-            if (isHandDetected) return;
-            isMouseDown = false; handlePointerUp();
-        });
+        canvasElement.addEventListener('mousedown', (e) => { if (!isHandDetected) { isMouseDown = true; handlePointerDown(getMousePos(e)); }});
+        canvasElement.addEventListener('mousemove', (e) => { if (!isHandDetected) { const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; handlePointerMove(p); }});
+        canvasElement.addEventListener('mouseup', () => { if (!isHandDetected) { isMouseDown = false; handlePointerUp(); }});
+        canvasElement.addEventListener('touchstart', (e) => { e.preventDefault(); if (!isHandDetected) { isMouseDown = true; handlePointerDown(getTouchPos(e)); }});
+        canvasElement.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isHandDetected) { const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; handlePointerMove(p); }});
+        canvasElement.addEventListener('touchend', () => { if (!isHandDetected) { isMouseDown = false; handlePointerUp(); }});
 
-        function getMousePos(e) {
-            const rect = canvasElement.getBoundingClientRect();
-            return { x: (e.clientX - rect.left) / rect.width * canvasElement.width, y: (e.clientY - rect.top) / rect.height * canvasElement.height };
-        }
+        function getMousePos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * canvasElement.width, y: (e.clientY - r.top) / r.height * canvasElement.height }; }
+        function getTouchPos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.touches[0].clientX - r.left) / r.width * canvasElement.width, y: (e.touches[0].clientY - r.top) / r.height * canvasElement.height }; }
 
         function handlePointerDown(pos) {
             cursor.isPinching = true;
             const dx = pos.x - stickObj.x; const dy = pos.y - stickObj.y;
-            if (Math.sqrt(dx*dx + dy*dy) < (stickObj.r * stickObj.scale) + 40 && !stickObj.isFired) {
+            if (Math.sqrt(dx*dx + dy*dy) < (stickObj.r * stickObj.scale) + 50 && !stickObj.isFired) {
                 stickObj.isGrabbed = true; cursor.state = 'PINCHED';
             } else { cursor.state = 'PINCH_MISS'; }
         }
@@ -282,13 +266,11 @@
             if (stickObj.isGrabbed) {
                 const dx = pos.x - tungBase.x; const dy = pos.y - tungBase.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const maxStretch = 150; // ยืดถอยหลังได้สูงสุด
+                const maxStretch = 180; // ดึงถอยหลังได้สูงสุด
                 if (dist > maxStretch) {
                     stickObj.x = tungBase.x + (dx / dist) * maxStretch;
                     stickObj.y = tungBase.y + (dy / dist) * maxStretch;
-                } else {
-                    stickObj.x = pos.x; stickObj.y = pos.y;
-                }
+                } else { stickObj.x = pos.x; stickObj.y = pos.y; }
                 cursor.state = 'PINCHED';
             } else {
                 const dx = pos.x - stickObj.x; const dy = pos.y - stickObj.y;
@@ -300,31 +282,22 @@
         function handlePointerUp() {
             cursor.isPinching = false;
             if (stickObj.isGrabbed) {
-                // คำนวณความเร็วพุ่งไปข้างหน้า (แปรผันตามระยะที่ง้าง)
                 const dx = tungBase.x - stickObj.x; 
                 const dy = tungBase.y - stickObj.y;
-                stickObj.vx = dx * 0.28; // ความแรงปา ปรับให้พุ่งเร็วสมจริง
-                stickObj.vy = dy * 0.28;
-                stickObj.isGrabbed = false; 
-                stickObj.isFired = true;
+                stickObj.vx = dx * 0.25; 
+                stickObj.vy = dy * 0.25;
+                stickObj.isGrabbed = false; stickObj.isFired = true;
             }
             cursor.state = 'NORMAL';
         }
 
         function updatePhysics() {
             if (stickObj.isFired) {
-                // พุ่งตรงเข้าไปในจอ
-                stickObj.x += stickObj.vx; 
-                stickObj.y += stickObj.vy;
-                
-                // คำนวณความเร็วเพื่อกำหนดรอบหมุนของไม้ (ปาแรง = หมุนติ้วเร็วมาก)
+                stickObj.x += stickObj.vx; stickObj.y += stickObj.vy;
                 const speed = Math.sqrt(stickObj.vx*stickObj.vx + stickObj.vy*stickObj.vy);
-                stickObj.rotation += speed * 0.015; 
-                
-                // ทำให้ไม้เล็กลง (จำลองระยะลึกเข้าไปในหน้าจอ)
-                if (stickObj.scale > 0.15) stickObj.scale -= 0.012; 
+                stickObj.rotation += speed * 0.02; // หมุนตามความแรง
+                if (stickObj.scale > 0.15) stickObj.scale -= 0.015; // เล็กลงเมื่อพุ่งลึก
 
-                // ตรวจจับการชนกับเป้าหมาย
                 targets.forEach(target => {
                     if (!target.isHit) {
                         const dx = stickObj.x - target.x; const dy = stickObj.y - target.y;
@@ -334,40 +307,34 @@
                     }
                 });
 
-                // ตรวจพิกัดหลุดขอบ เพื่อรีเซ็ตไม้
-                if (stickObj.y < -100 || stickObj.x > canvasElement.width + 120 || stickObj.x < -120) {
+                if (stickObj.y < -150 || stickObj.x > canvasElement.width + 150 || stickObj.x < -150) {
                     stickObj.isFired = false; 
-                    setTimeout(() => { if (gameState === 'PLAYING') resetStick(); }, 600);
+                    setTimeout(() => { if (gameState === 'PLAYING') resetStick(); }, 500);
                 }
             }
         }
 
         function handleTargetHit(target) {
             if (target.isCorrect) {
-                score += isBonusRound ? 300 : 100;
-                uiScore.innerText = score;
-                setTimeout(() => { if (gameState === 'PLAYING') loadQuestion(currentQuestionIdx + 1); }, 1000);
+                score += isBonusRound ? 300 : 100; uiScore.innerText = score;
+                setTimeout(() => { if (gameState === 'PLAYING') loadQuestion(currentQuestionIdx + 1); }, 1200);
             } else {
                 setTimeout(() => { if (gameState === 'PLAYING' && !targets.some(t => t.isCorrect && t.isHit)) resetStick(); }, 1200);
             }
         }
-
         setInterval(updatePhysics, 1000 / 60);
 
         function drawGame() {
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            const time = Date.now(); // ใช้เวลาเป็นตัวเร่งอนิเมชัน
 
-            // 1. วาดฉากหลัง (Background)
+            // 1. พื้นหลัง
             if (isWebcamActive) {
-                ctx.save();
-                ctx.translate(canvasElement.width, 0); ctx.scale(-1, 1);
-                ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-                ctx.restore();
-                // ฟิลเตอร์สีจางๆ ให้เข้ากับธีม
-                ctx.fillStyle = isBonusRound ? 'rgba(88, 28, 135, 0.4)' : 'rgba(15, 23, 42, 0.3)';
+                ctx.save(); ctx.translate(canvasElement.width, 0); ctx.scale(-1, 1);
+                ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height); ctx.restore();
+                ctx.fillStyle = isBonusRound ? 'rgba(88, 28, 135, 0.4)' : 'rgba(15, 23, 42, 0.2)';
                 ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
             } else {
-                // ถ้าไม่มีกล้อง วาดภาพพื้นหลัง (โบนัส หรือ ปกติ)
                 try {
                     let bgImg = isBonusRound ? images.bgBonus : images.bgNormal;
                     ctx.drawImage(bgImg, 0, 0, canvasElement.width, canvasElement.height);
@@ -375,72 +342,88 @@
             }
 
             if (gameState === 'PLAYING') {
-                // 2. เส้นประเล็งทิศทาง (Trajectory Line)
+                // 2. เส้นเล็งทิศทาง (Trajectory Line)
                 if (stickObj.isGrabbed) {
-                    const pullDx = tungBase.x - stickObj.x; 
-                    const pullDy = tungBase.y - stickObj.y;
+                    const pullDx = tungBase.x - stickObj.x; const pullDy = tungBase.y - stickObj.y;
+                    const aimEndX = tungBase.x + pullDx * 6; const aimEndY = tungBase.y + pullDy * 6;
                     
-                    // คำนวณเป้าหมายที่คาดว่าจะพุ่งไปตก (ยืดเส้นนำทางออกไปข้างหน้า)
-                    const aimEndX = tungBase.x + pullDx * 6; 
-                    const aimEndY = tungBase.y + pullDy * 6;
-                    
-                    // เส้นประเล็งทิศทาง
-                    ctx.beginPath();
-                    ctx.moveTo(tungBase.x, tungBase.y);
-                    ctx.lineTo(aimEndX, aimEndY);
-                    
+                    ctx.beginPath(); ctx.moveTo(tungBase.x, tungBase.y); ctx.lineTo(aimEndX, aimEndY);
                     ctx.setLineDash([15, 10]); 
                     let lineGrad = ctx.createLinearGradient(tungBase.x, tungBase.y, aimEndX, aimEndY);
-                    lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-                    lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    ctx.strokeStyle = lineGrad; 
-                    ctx.lineWidth = 5; 
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    // เส้นจำลองที่เชื่อมระหว่างมือกับทุงทุง (เหมือนเส้นยางยืด)
-                    ctx.beginPath();
-                    ctx.moveTo(tungBase.x, tungBase.y);
-                    ctx.lineTo(stickObj.x, stickObj.y);
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; 
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
+                    lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)'); lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    ctx.strokeStyle = lineGrad; ctx.lineWidth = 5; ctx.stroke(); ctx.setLineDash([]);
+                    // หนังยาง
+                    ctx.beginPath(); ctx.moveTo(tungBase.x, tungBase.y); ctx.lineTo(stickObj.x, stickObj.y);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 4; ctx.stroke();
                 }
 
-                // 3. วาดตัวผู้เล่นทุงทุง (ยืนนิ่งๆ ด้านล่าง)
+                // 3. วาดทุงทุง (มีอนิเมชันหายใจ และย่อตัวตอนง้าง)
+                ctx.save();
+                ctx.translate(tungBase.x, tungBase.y); // เลื่อนจุดศูนย์กลางไปที่ฐาน
+                
+                let scaleX = 1 + Math.sin(time * 0.003) * 0.02; // หายใจกว้าง
+                let scaleY = 1 + Math.cos(time * 0.003) * 0.03; // หายใจสูง
+
+                if (stickObj.isGrabbed) {
+                    // ถ้าง้างไม้ ให้ตัวโดนบีบย่อลงแบนๆ
+                    const pullDx = tungBase.x - stickObj.x; const pullDy = tungBase.y - stickObj.y;
+                    const dist = Math.sqrt(pullDx*pullDx + pullDy*pullDy);
+                    const squash = Math.min(dist / 180, 1); // 0 ถึง 1
+                    scaleY -= squash * 0.2; // หดลง 20%
+                    scaleX += squash * 0.1; // อ้วนขึ้น 10%
+                }
+                
+                ctx.scale(scaleX, scaleY);
                 try {
-                    // วาดให้อยู่กึ่งกลางฐาน ปรับขนาดได้ตามภาพจริง
-                    ctx.drawImage(images.main, tungBase.x - 120, tungBase.y - 120, 240, 240);
+                    // วาดเยื้องขึ้นไปเพื่อยึดฐานไว้กับพื้น
+                    ctx.drawImage(images.main, -120, -220, 240, 240);
                 } catch(e) {}
+                ctx.restore();
 
-                // 4. วาดเป้าหมายแก๊งทุงทุง
-                const time = Date.now() / 300; // เวลาสำหรับอนิเมชั่นลอย
+                // 4. วาดเป้าหมายทุงทุงและเอฟเฟกต์ (มีอนิเมชันลอยและระเบิด)
                 targets.forEach(target => {
-                    const floatY = Math.sin(time + target.floatOffset) * 12;
-                    const tx = target.x; const ty = target.y + floatY;
+                    // อนิเมชันลอยไปมา
+                    const floatX = Math.cos((time * 0.002) + target.floatOffset) * 12;
+                    const floatY = Math.sin((time * 0.003) + target.floatOffset) * 15;
+                    const tx = target.x + floatX; const ty = target.y + floatY;
 
-                    // เลือกรูปมอนสเตอร์เป้าหมาย
-                    let tImg = images.target1;
-                    if (target.type === 2) tImg = images.target2;
-                    if (target.type === 3) tImg = images.target3;
+                    ctx.save();
+                    ctx.translate(tx, ty);
 
-                    // ถ้าโดนปาแล้ว ให้เปลี่ยนเป็นรูปเอฟเฟกต์ ระเบิด หรือ ร้องไห้
-                    if (target.isHit) tImg = target.isCorrect ? images.correct : images.wrong;
+                    if (target.isHit) {
+                        // อนิเมชัน ระเบิดค่อยๆ ใหญ่ขึ้น และโปร่งแสงจนหายไป
+                        target.hitScale += 0.025; 
+                        target.hitAlpha -= 0.03; 
+                        if (target.hitAlpha < 0) target.hitAlpha = 0;
 
-                    try {
-                        ctx.drawImage(tImg, tx - target.r*2, ty - target.r*2, target.r*4, target.r*4);
-                        
-                        // วาดป้าย Badge ถือคำตอบ
-                        ctx.drawImage(images.badge, tx - 50, ty - target.r - 45, 100, 50);
-                        // เขียนตัวเลขลงบนป้าย
-                        ctx.fillStyle = '#fff';
-                        ctx.font = '900 24px Arial';
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(target.val, tx, ty - target.r - 20);
-                    } catch(e) {}
+                        ctx.globalAlpha = target.hitAlpha;
+                        ctx.scale(target.hitScale, target.hitScale);
+                        let effectImg = target.isCorrect ? images.correct : images.wrong;
+                        try {
+                            ctx.drawImage(effectImg, -target.r*2, -target.r*2, target.r*4, target.r*4);
+                        } catch(e) {}
+                    } else {
+                        // รูปแก๊งทุงทุงปกติ (เอียงตัวเล็กน้อยตามจังหวะลอย)
+                        let tImg = images.target1;
+                        if (target.type === 2) tImg = images.target2;
+                        if (target.type === 3) tImg = images.target3;
+
+                        let rot = Math.sin((time * 0.002) + target.floatOffset) * 0.08;
+                        ctx.rotate(rot);
+
+                        try {
+                            ctx.drawImage(tImg, -target.r*1.8, -target.r*1.8, target.r*3.6, target.r*3.6);
+                            // ป้ายถือคำตอบ
+                            ctx.drawImage(images.badge, -50, -target.r - 45, 100, 50);
+                            ctx.fillStyle = '#fff'; ctx.font = '900 24px Arial';
+                            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                            ctx.fillText(target.val, 0, -target.r - 20);
+                        } catch(e) {}
+                    }
+                    ctx.restore();
                 });
 
-                // 5. วาดท่อนไม้ (สิ่งที่ถูกปาและหมุนติ้ว)
+                // 5. วาดท่อนไม้ (หมุนติ้ว และมีมิติเล็กลง)
                 ctx.save();
                 ctx.translate(stickObj.x, stickObj.y);
                 ctx.rotate(stickObj.rotation);
@@ -450,16 +433,14 @@
                 } catch(e) {}
                 ctx.restore();
 
-                // 6. วาด AR Cursor 
+                // 6. วาดเคอร์เซอร์ระบบ AR 
                 if (isHandDetected) {
                     try {
                         ctx.globalAlpha = cursor.state === 'PINCHED' ? 1.0 : 0.7;
                         if (cursor.state === 'HOVER') ctx.filter = 'drop-shadow(0 0 10px yellow)';
                         ctx.drawImage(images.cursor, cursor.x - 25, cursor.y - 25, 50, 50);
                         ctx.filter = 'none'; ctx.globalAlpha = 1.0;
-                    } catch(e) {
-                        ctx.beginPath(); ctx.arc(cursor.x, cursor.y, 15, 0, Math.PI*2); ctx.fillStyle='white'; ctx.fill();
-                    }
+                    } catch(e) {}
                 }
             }
             requestAnimationFrame(drawGame);
@@ -484,7 +465,7 @@
             const titleEl = document.getElementById('summary-title');
             const subEl = document.getElementById('summary-sub');
 
-            // เปลี่ยนภาพพื้นหลังของหน้า Game Over ให้ตรงกับผลลัพธ์
+            // ใช้รูป .png แทน .jpg แล้ว
             if (isClear) {
                 titleEl.innerText = "ALL CLEAR! 🎉";
                 subEl.innerText = "ชนะระดับเทพ! แก๊งทุงทุงยอมแพ้แล้ว!";
@@ -503,72 +484,62 @@
 
         btnStart.addEventListener('click', () => {
             startScreen.classList.add('hidden');
-            gameState = 'PLAYING'; score = 0; totalTimeSpent = 0;
-            uiScore.innerText = score;
-            questionsList = generateMathQuestions();
-            loadQuestion(0); startTimer();
+            gameState = 'PLAYING'; score = 0; totalTimeSpent = 0; uiScore.innerText = score;
+            questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
         btnRestart.addEventListener('click', () => {
             gameOverScreen.classList.add('hidden');
-            gameState = 'PLAYING'; score = 0; totalTimeSpent = 0;
-            uiScore.innerText = score;
-            questionsList = generateMathQuestions();
-            loadQuestion(0); startTimer();
+            gameState = 'PLAYING'; score = 0; totalTimeSpent = 0; uiScore.innerText = score;
+            questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
-        // เปิดกล้องและระบบ AI MediaPipe
         async function initCamera() {
             try {
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const hasWebcam = devices.some(device => device.kind === 'videoinput');
-                if (!hasWebcam) {
-                    switchToClassicMode("🎮 โหมดปกติ: ทุงทุงพร้อมลุย! (ไม่พบกล้อง ใช้เมาส์ปาไม้แทน)");
-                    return;
-                }
+                if (!hasWebcam) { switchToClassicMode("🎮 โหมดปกติ: (ไม่พบกล้อง ใช้เมาส์/ทัชแทน)"); return; }
             } catch (e) { }
 
             let mpTimeout = setTimeout(() => {
                 if (!isWebcamActive) {
-                    statusText.innerText = "⚡ สลับเข้าโหมดเมาส์บนจอ AR (ระบบ AI โหลดช้า)";
+                    statusText.innerText = "⚡ ระบบวิเคราะห์มือโหลดช้า: สลับเข้าสู่โหมดเว็บแคม (ใช้เมาส์เล่น)";
                     startRawWebcam();
                 }
             }, 5000);
 
             try {
                 const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-                hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.55, minTrackingConfidence: 0.55 });
-
+                hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+                
                 hands.onResults((results) => {
-                    clearTimeout(mpTimeout);
+                    clearTimeout(mpTimeout); 
                     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                         isHandDetected = true; isWebcamActive = true;
-                        statusText.innerText = "เชื่อมต่อระบบ AR เรียบร้อย 🖐️";
+                        statusText.innerText = "เชื่อมต่อระบบ AR Hand Tracking เรียบร้อย 🖐️";
                         
-                        const landmarks = results.multiHandLandmarks[0];
-                        const indexTip = { x: (1 - landmarks[8].x) * canvasElement.width, y: landmarks[8].y * canvasElement.height };
-                        const thumbTip = { x: (1 - landmarks[4].x) * canvasElement.width, y: landmarks[4].y * canvasElement.height };
-
+                        const lm = results.multiHandLandmarks[0];
+                        const indexTip = { x: (1 - lm[8].x) * canvasElement.width, y: lm[8].y * canvasElement.height };
+                        const thumbTip = { x: (1 - lm[4].x) * canvasElement.width, y: lm[4].y * canvasElement.height };
+                        
                         cursor.x = indexTip.x; cursor.y = indexTip.y;
+                        const dist = Math.sqrt(Math.pow(indexTip.x - thumbTip.x, 2) + Math.pow(indexTip.y - thumbTip.y, 2));
+                        const isPinch = dist < 45;
 
-                        const dx = indexTip.x - thumbTip.x; const dy = indexTip.y - thumbTip.y;
-                        const currentPinch = Math.sqrt(dx * dx + dy * dy) < 45;
-
-                        if (currentPinch && !cursor.isPinching) handlePointerDown(cursor);
-                        else if (!currentPinch && cursor.isPinching) handlePointerUp();
+                        if (isPinch && !cursor.isPinching) handlePointerDown(cursor);
+                        else if (!isPinch && cursor.isPinching) handlePointerUp();
                         else handlePointerMove(cursor);
                     } else {
                         if (isHandDetected) {
                             isHandDetected = false; cursor.isPinching = false;
                             if (stickObj.isGrabbed) handlePointerUp();
-                            statusText.innerText = "กำลังหามือของคุณ...";
+                            statusText.innerText = "กำลังหามือของคุณ... (คุณสามารถใช้เมาส์คลิกลากเล่นแทนได้)";
                         }
                     }
                 });
 
                 const camera = new Camera(videoElement, { onFrame: async () => { await hands.send({ image: videoElement }); }, width: 640, height: 360 });
                 await camera.start(); isWebcamActive = true;
-
             } catch (err) {
                 clearTimeout(mpTimeout); startRawWebcam(); 
             }
@@ -576,13 +547,12 @@
 
         function startRawWebcam() {
             navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } })
-                .then((stream) => { videoElement.srcObject = stream; isWebcamActive = true; statusText.innerText = "🎮 โหมดเมาส์บนกล้องจริง (ใช้เมาส์ลากปาไม้)"; })
-                .catch((err) => { switchToClassicMode("🎮 โหมดปกติ: พร้อมลุย! (เข้าถึงกล้องไม่ได้ ใช้เมาส์เล่นบนพื้นหลังแทน)"); });
+                .then((stream) => { videoElement.srcObject = stream; isWebcamActive = true; statusText.innerText = "🎮 โหมดเมาส์บนกล้องจริง: พร้อมใช้งาน"; })
+                .catch((err) => { switchToClassicMode("🎮 โหมดปกติ: บอร์ดเกมพร้อมใช้งาน (เข้าถึงกล้องไม่ได้ ใช้ฉากจำลอง)"); });
         }
 
         function switchToClassicMode(message) {
-            isWebcamActive = false; isHandDetected = false;
-            statusText.innerText = message;
+            isWebcamActive = false; isHandDetected = false; statusText.innerText = message;
         }
 
         initCamera();
