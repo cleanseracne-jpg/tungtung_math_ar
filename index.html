@@ -26,16 +26,37 @@
     <video id="webcam" class="hidden" autoplay playsinline></video>
 
     <!-- หน้าแรก: ใช้พื้นหลัง bg-start.png -->
-    <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50 bg-cover bg-center bg-no-repeat" style="background-image: url('images/bg-start.png'); background-color: #f97316;">
-        <div class="glass p-8 rounded-3xl text-center max-w-lg shadow-2xl mx-4 border-2 border-white/50 bg-black/50">
-            <h1 class="text-4xl md:text-5xl font-black mb-3 drop-shadow-lg text-yellow-300">🪵 TungTung Math AR</h1>
-            <p class="text-xl font-bold mb-6 text-white drop-shadow-md">ศึกทุงทุง ปาไม้ทายสูตรคูณ</p>
-            <div class="text-left bg-black/60 p-5 rounded-2xl mb-6 text-sm space-y-3 text-orange-50 border border-white/20">
+    <div id="start-screen" class="absolute inset-0 z-50 bg-cover bg-center bg-no-repeat" style="background-image: url('images/bg-start.png'); background-color: #f97316;">
+        
+        <!-- กล่องข้อความ UI (ปรับให้อยู่ตรงกลางบนมือถือ และย้ายไปบนป้ายไม้ด้านซ้ายในหน้าจอคอมฯ) -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                    md:top-[53%] md:left-[23%] w-[90%] max-w-md md:w-[32vw] md:max-w-none 
+                    p-6 md:p-3 lg:p-6 text-center 
+                    bg-black/70 md:bg-transparent border-2 border-white/50 md:border-none 
+                    rounded-3xl backdrop-blur-md md:backdrop-blur-none shadow-2xl md:shadow-none">
+            
+            <!-- หัวข้อเกม (สีน้ำตาลเข้มบนป้ายไม้) -->
+            <h1 class="text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-2 lg:mb-3 
+                       drop-shadow-lg md:drop-shadow-none text-yellow-300 md:text-amber-950" style="line-height: 1.1;">
+                🪵 TungTung<br>Math AR
+            </h1>
+            
+            <p class="text-xl md:text-sm lg:text-lg font-bold mb-4 lg:mb-6 
+                      text-white md:text-amber-900 drop-shadow-md md:drop-shadow-none">
+                ศึกทุงทุง ปาไม้ทายสูตรคูณ
+            </p>
+            
+            <!-- กล่องคำอธิบาย (ทำพื้นหลังโปร่งแสงสีน้ำตาลอ่อนให้เข้ากับไม้) -->
+            <div class="text-left bg-black/60 md:bg-amber-900/10 p-4 lg:p-5 rounded-2xl 
+                        mb-5 lg:mb-6 text-sm md:text-xs lg:text-sm space-y-2 lg:space-y-3 
+                        text-orange-50 md:text-amber-950 border border-white/20 md:border-amber-900/20">
                 <p>🎯 <b>ภารกิจ:</b> ช่วยทุงทุงปาไม้ใส่แก๊งตัวประหลาดที่ถือคำตอบถูกต้อง</p>
-                <p>⏳ <b>เวลา:</b> มี 20 ข้อ (ปกติ 30 วิ/ข้อ) โบนัส 3 ข้อ (90 วิ/ข้อ)</p>
-                <p>🖐️ <b>วิธีเล่น (AR):</b> ใช้ <b>นิ้วโป้งและนิ้วชี้จีบเข้าหากัน</b> เพื่อหยิบไม้ ดึงถอยหลัง แล้วปล่อยเพื่อปา! (ใช้เมาส์ลากยิงแทนได้)</p>
+                <p>⏳ <b>เวลา:</b> มี 20 ข้อ (ปกติ 30 วิ/ข้อ) โบนัส 3 ข้อ (90 วิ)</p>
+                <p>🖐️ <b>วิธีเล่น:</b> ใช้นิ้วจีบกันเพื่อหยิบไม้ ดึงถอยหลัง แล้วปล่อยเพื่อปา!</p>
             </div>
-            <button id="btn-start" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-400 hover:to-orange-400 text-white font-black text-2xl py-4 rounded-2xl transition shadow-[0_0_15px_rgba(251,146,60,0.8)] transform hover:scale-105 cursor-pointer">
+            
+            <!-- ปุ่มเริ่มเกม (คงสีสันไว้ให้เด่นชัดน่ากด) -->
+            <button id="btn-start" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-400 hover:to-orange-400 text-white font-black text-xl lg:text-2xl py-3 lg:py-4 rounded-2xl transition shadow-[0_0_15px_rgba(251,146,60,0.8)] transform hover:scale-105 cursor-pointer">
                 เข้าสู่เกม (Start)
             </button>
         </div>
