@@ -442,21 +442,46 @@
             questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
+        // ระบบ Fullscreen ที่ปรับปรุงให้รองรับทุกอุปกรณ์
         btnFullscreen.addEventListener('click', () => {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.webkitRequestFullscreen) { 
-                    document.documentElement.webkitRequestFullscreen();
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            // รวมคำสั่งขอขยายจอของทุกค่าย (Android, Chrome, Firefox, Safari คอม)
+            const requestFullScreen = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    // ถ้าเบราว์เซอร์รองรับ ให้พยายามขยายจอ
+                    requestFullScreen.call(docEl).catch(err => {
+                        console.log(`Fullscreen error: ${err.message}`);
+                        showToast("เบราว์เซอร์ของคุณจำกัดการขยายจออัตโนมัติ");
+                    });
+                } else {
+                    // ถ้าไม่รองรับเลย (เช่น Safari บน iPhone/iPad)
+                    showToast("ระบบ iOS (iPhone/iPad) ไม่รองรับปุ่มนี้ แนะนำให้ซ่อนแถบด้านบนหรือหมุนจอเอาครับ 📱");
                 }
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { 
-                    document.webkitExitFullscreen();
+                if (cancelFullScreen) {
+                    cancelFullScreen.call(doc);
                 }
             }
         });
+
+        // ฟังก์ชันสร้างกล่องข้อความแจ้งเตือนสวยๆ (แทน alert)
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl z-[100] font-bold text-center border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] transition-opacity duration-500 text-xs sm:text-sm w-[85%] max-w-md';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            
+            // ค่อยๆ จางหายไปหลังผ่านไป 4 วินาที
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(toast), 500);
+            }, 4000);
+        }
 
         let currentStream = null;
 
