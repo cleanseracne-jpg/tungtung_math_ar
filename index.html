@@ -21,7 +21,7 @@
         /* บังคับสัดส่วน 16:9 ให้เกมไม่บีบแบน */
         .game-container {
             aspect-ratio: 16 / 9;
-            max-height: 100dvh; /* เปลี่ยนจาก 100vh เป็น 100dvh แก้แถบเบราว์เซอร์บังในมือถือ */
+            max-height: 100dvh;
             max-width: 100vw;
         }
     </style>
@@ -30,17 +30,16 @@
 
     <video id="webcam" class="hidden" autoplay playsinline></video>
 
-    <!-- หน้าแรก: เปลี่ยนข้อความออก เหลือแค่ปุ่ม และปรับตำแหน่งให้อยู่ตรงป้ายไม้ -->
+    <!-- หน้าแรก: เหลือแค่ปุ่มเข้าสู่เกม จัดตำแหน่งไปที่กรอบป้ายไม้ซ้ายล่าง -->
     <div id="start-screen" class="absolute inset-0 z-50 bg-cover bg-center bg-no-repeat" style="background-image: url('images/bg-start.png'); background-color: #f97316;">
-        <!-- ใช้ div จัดตำแหน่งปุ่มให้อยู่ในกรอบไม้ซ้ายล่าง (อ้างอิงจากรูปภาพใหม่) -->
         <div class="absolute w-[80%] md:w-[35%] max-w-md top-[75%] left-1/2 md:top-[70%] md:left-[23%] transform -translate-x-1/2 -translate-y-1/2 text-center">
-            <button id="btn-start" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-400 hover:to-orange-400 text-white font-black text-xl lg:text-2xl py-3 lg:py-4 rounded-2xl transition shadow-[0_0_15px_rgba(251,146,60,0.8)] transform hover:scale-105 cursor-pointer border-2 border-white/50">
+            <button id="btn-start" class="w-full bg-gradient-to-r from-orange-400 to-amber-600 hover:from-orange-500 hover:to-amber-700 text-white font-black text-xl lg:text-2xl py-3 lg:py-4 rounded-full transition shadow-lg transform hover:scale-105 cursor-pointer border-4 border-amber-800 pointer-events-auto">
                 เข้าสู่เกม (Start)
             </button>
         </div>
     </div>
 
-    <!-- หุ้มกล่องเกมให้อยู่ตรงกลาง และบังคับ 16:9 เสมอ (แก้ไขภาพบีบ) -->
+    <!-- กล่องเกมหลัก -->
     <div class="relative w-full game-container max-w-6xl mx-auto bg-black rounded-none md:rounded-3xl overflow-hidden shadow-2xl border-0 md:border-4 border-slate-700">
         
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-20"></canvas>
@@ -50,7 +49,6 @@
             
             <!-- แถวบน: สถานะข้อ, คะแนน, และเวลา/ขยายจอ -->
             <div class="flex justify-between items-start">
-                <!-- ข้อและคะแนน -->
                 <div class="glass px-2 py-1 sm:px-4 sm:py-2 rounded-xl flex items-center space-x-2 sm:space-x-4">
                     <div class="text-center">
                         <div class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">ข้อที่</div>
@@ -63,19 +61,19 @@
                     </div>
                 </div>
 
-                <!-- กลุ่มขวาบน: จับเวลา + ปุ่ม Fullscreen -->
                 <div class="flex space-x-2">
                     <div class="glass px-2 py-1 sm:px-4 sm:py-2 rounded-xl text-center">
                         <div class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">เวลาที่เหลือ</div>
                         <div id="ui-timer" class="text-sm sm:text-xl md:text-2xl font-black text-pink-400">00:30</div>
                     </div>
+                    <!-- ปุ่มขยายจอ -->
                     <button id="btn-fullscreen" class="glass px-2 py-1 sm:px-3 sm:py-2 rounded-xl flex items-center justify-center text-white pointer-events-auto hover:bg-white/20 transition cursor-pointer shadow-lg" title="เต็มหน้าจอ">
-                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
                     </button>
                 </div>
             </div>
 
-            <!-- แถวล่าง: ป้ายคำถาม (ย้ายมาตรงกลางด้านล่างตามที่ขอ) -->
+            <!-- แถวล่าง: ป้ายคำถาม ย้ายมาอยู่กลางล่าง -->
             <div class="flex justify-center mb-2 sm:mb-8">
                 <div class="relative px-6 py-3 sm:px-12 sm:py-5 text-center min-w-[180px] sm:min-w-[280px] bg-contain bg-center bg-no-repeat drop-shadow-xl" style="background-image: url('images/ui-board.png');">
                     <div class="absolute inset-0 bg-black/30 rounded-xl sm:rounded-2xl -z-10" style="backdrop-filter: blur(2px);"></div>
@@ -107,7 +105,7 @@
                 </div>
             </div>
 
-            <button id="btn-restart" class="w-full bg-cyan-500 hover:bg-cyan-400 text-white font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl sm:rounded-2xl transition shadow-[0_0_15px_rgba(6,182,212,0.8)] transform hover:scale-105 cursor-pointer">
+            <button id="btn-restart" class="w-full bg-cyan-500 hover:bg-cyan-400 text-white font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl sm:rounded-2xl transition shadow-[0_0_15px_rgba(6,182,212,0.8)] transform hover:scale-105 cursor-pointer pointer-events-auto">
                 เล่นอีกครั้ง 🔄
             </button>
         </div>
@@ -149,6 +147,24 @@
         images.badge.src = 'images/ui-badge.png';
         images.cursor.src = 'images/ui-cursor.png';
 
+        // โหลดระบบเสียง
+        const bgm = new Audio('sounds/bgm_thinking.mp3');
+        bgm.loop = true; 
+        bgm.volume = 0.3; // เบาดนตรีลงหน่อยเพื่อให้ได้ยินเสียงปาชัดๆ
+
+        const sfxLock = new Audio('sounds/sfx_lock.mp3');
+        const sfxThrow = new Audio('sounds/sfx_throw.mp3');
+        const sfxCorrect = new Audio('sounds/sfx_correct.mp3');
+        const sfxWrong = new Audio('sounds/sfx_wrong.mp3');
+        const sfxVictory = new Audio('sounds/sfx_victory.mp3');
+        const sfxGameOver = new Audio('sounds/sfx_gameover.mp3');
+
+        // ฟังก์ชันช่วยเล่นเสียงเอฟเฟกต์ไม่ให้ซ้อนกันและแก้บั๊กเว็บบล็อกเสียง
+        function playSFX(audioElement) {
+            audioElement.currentTime = 0;
+            audioElement.play().catch(e => console.log("รออนุญาตเล่นเสียง:", e));
+        }
+
         let gameState = 'START'; 
         let score = 0;
         let currentQuestionIdx = 0;
@@ -163,9 +179,9 @@
         let isHandDetected = false;
         let isWebcamActive = false; 
 
-        // ปรับตำแหน่งทุงทุงให้ต่ำลงมาชิดขอบจอ เพื่อให้เล็งเป้าข้างบนได้ง่ายขึ้น
-        const tungBase = { x: 600, y: 620 }; 
-        let stickObj = { x: 600, y: 620, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
+        // ปรับตำแหน่งทุงทุงลงมาด้านล่างสุดของจอ
+        const tungBase = { x: 600, y: 560 }; 
+        let stickObj = { x: 600, y: 560, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
         let targets = []; 
         let tungThrowAnimTimer = 0;
 
@@ -230,11 +246,10 @@
                 uiMathTitle.innerText = "🔥 ด่านโบนัส! (300 คะแนน) 🔥";
                 uiMathTitle.classList.replace('text-yellow-300', 'text-pink-400');
             } else {
-                uiMathTitle.innerText = "แก๊งมอนสเตอร์บุก!"; // เปลี่ยนชื่อ
+                uiMathTitle.innerText = "แก๊งมอนสเตอร์บุก!";
                 uiMathTitle.classList.replace('text-pink-400', 'text-yellow-300');
             }
 
-            // ตำแหน่งเป้าหมายด้านบน
             const positions = [ { x: 300, y: 160 }, { x: 600, y: 160 }, { x: 900, y: 160 } ];
             targets = qData.options.map((opt, i) => {
                 let type = Math.floor(Math.random() * 3) + 1; 
@@ -248,19 +263,53 @@
             resetStick();
         }
 
-        canvasElement.addEventListener('mousedown', (e) => { if (!isHandDetected) { cursor.isAiming = true; cursor.wasFist = true; const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('mousemove', (e) => { if (!isHandDetected) { const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('mouseup', (e) => { if (!isHandDetected && cursor.wasFist) { cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); }});
+        // ควบคุมผ่านเมาส์ (กดค้าง = เล็ง, ปล่อย = ปา)
+        canvasElement.addEventListener('mousedown', (e) => { 
+            if (!isHandDetected) { 
+                playSFX(sfxLock); // เสียงล็อกเป้า
+                cursor.isAiming = true; cursor.wasFist = true; 
+                const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; 
+            }
+        });
+        canvasElement.addEventListener('mousemove', (e) => { 
+            if (!isHandDetected) { 
+                const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; 
+            }
+        });
+        canvasElement.addEventListener('mouseup', (e) => { 
+            if (!isHandDetected && cursor.wasFist) { 
+                cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); 
+            }
+        });
         
-        canvasElement.addEventListener('touchstart', (e) => { e.preventDefault(); if (!isHandDetected) { cursor.isAiming = true; cursor.wasFist = true; const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isHandDetected) { const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('touchend', (e) => { e.preventDefault(); if (!isHandDetected && cursor.wasFist) { cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); }});
+        // ควบคุมผ่านทัชสกรีน
+        canvasElement.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            if (!isHandDetected) { 
+                playSFX(sfxLock); // เสียงล็อกเป้า
+                cursor.isAiming = true; cursor.wasFist = true; 
+                const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; 
+            }
+        });
+        canvasElement.addEventListener('touchmove', (e) => { 
+            e.preventDefault(); 
+            if (!isHandDetected) { 
+                const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; 
+            }
+        });
+        canvasElement.addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            if (!isHandDetected && cursor.wasFist) { 
+                cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); 
+            }
+        });
 
         function getMousePos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * canvasElement.width, y: (e.clientY - r.top) / r.height * canvasElement.height }; }
         function getTouchPos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.touches[0].clientX - r.left) / r.width * canvasElement.width, y: (e.touches[0].clientY - r.top) / r.height * canvasElement.height }; }
 
         function shootStick(pos) {
             if (!stickObj.isFired && gameState === 'PLAYING') {
+                playSFX(sfxThrow); // เสียงปาไม้
                 const dx = pos.x - tungBase.x;
                 const dy = pos.y - tungBase.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
@@ -292,7 +341,7 @@
                 });
 
                 if (stickObj.y < -150 || stickObj.x > canvasElement.width + 150 || stickObj.x < -150 || stickObj.y > canvasElement.height + 150) {
-                    resetStick();
+                    resetStick(); // ดึงไม้กลับมาที่เดิมถ้าหลุดจอ
                 }
             }
             if (tungThrowAnimTimer > 0) tungThrowAnimTimer--;
@@ -300,11 +349,16 @@
 
         function handleTargetHit(target) {
             if (target.isCorrect) {
-                score += isBonusRound ? 300 : 100; uiScore.innerText = score;
+                playSFX(sfxCorrect); // เสียงถูกต้อง
+                score += isBonusRound ? 300 : 100; 
+                uiScore.innerText = score;
                 setTimeout(() => { if (gameState === 'PLAYING') loadQuestion(currentQuestionIdx + 1); }, 1200);
             } else {
-                score -= 100; uiScore.innerText = score;
-                setTimeout(() => { if (gameState === 'PLAYING' && !targets.some(t => t.isCorrect && t.isHit)) resetStick(); }, 300);
+                playSFX(sfxWrong); // เสียงผิด
+                score -= 100; 
+                uiScore.innerText = score;
+                // ปาผิดให้สร้างไม้กลับมาให้ปาใหม่ทันที
+                setTimeout(() => { if (gameState === 'PLAYING' && !targets.some(t => t.isCorrect && t.isHit)) resetStick(); }, 100);
             }
         }
         setInterval(updatePhysics, 1000 / 60);
@@ -411,6 +465,10 @@
             clearInterval(timerInterval);
             gameOverScreen.classList.remove('hidden');
 
+            // ปิดเพลงฉากเล่น และเปิดเสียงตอนจบ
+            bgm.pause();
+            if (isClear) { playSFX(sfxVictory); } else { playSFX(sfxGameOver); }
+
             const titleEl = document.getElementById('summary-title');
             const subEl = document.getElementById('summary-sub');
 
@@ -431,36 +489,39 @@
         }
 
         btnStart.addEventListener('click', () => {
+            // ระบบเสียงจะทำงานได้หลังผู้ใช้กดปุ่มแล้ว
+            bgm.currentTime = 0;
+            bgm.play().catch(e => console.log(e));
+
             startScreen.classList.add('hidden');
             gameState = 'PLAYING'; score = 0; totalTimeSpent = 0; uiScore.innerText = score;
             questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
         btnRestart.addEventListener('click', () => {
+            sfxVictory.pause();
+            sfxGameOver.pause();
+            bgm.currentTime = 0;
+            bgm.play().catch(e => console.log(e));
+
             gameOverScreen.classList.add('hidden');
             gameState = 'PLAYING'; score = 0; totalTimeSpent = 0; uiScore.innerText = score;
             questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
-        // ระบบ Fullscreen ที่ปรับปรุงให้รองรับทุกอุปกรณ์
         btnFullscreen.addEventListener('click', () => {
             const doc = window.document;
             const docEl = doc.documentElement;
-
-            // รวมคำสั่งขอขยายจอของทุกค่าย (Android, Chrome, Firefox, Safari คอม)
             const requestFullScreen = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
             const cancelFullScreen = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
 
             if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
                 if (requestFullScreen) {
-                    // ถ้าเบราว์เซอร์รองรับ ให้พยายามขยายจอ
                     requestFullScreen.call(docEl).catch(err => {
-                        console.log(`Fullscreen error: ${err.message}`);
                         showToast("เบราว์เซอร์ของคุณจำกัดการขยายจออัตโนมัติ");
                     });
                 } else {
-                    // ถ้าไม่รองรับเลย (เช่น Safari บน iPhone/iPad)
-                    showToast("ระบบ iOS (iPhone/iPad) ไม่รองรับปุ่มนี้ แนะนำให้ซ่อนแถบด้านบนหรือหมุนจอเอาครับ 📱");
+                    showToast("ระบบ iOS (iPhone/iPad) ไม่รองรับปุ่มนี้ แนะนำให้หมุนจอเอาครับ 📱");
                 }
             } else {
                 if (cancelFullScreen) {
@@ -469,14 +530,11 @@
             }
         });
 
-        // ฟังก์ชันสร้างกล่องข้อความแจ้งเตือนสวยๆ (แทน alert)
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl z-[100] font-bold text-center border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] transition-opacity duration-500 text-xs sm:text-sm w-[85%] max-w-md';
             toast.innerText = message;
             document.body.appendChild(toast);
-            
-            // ค่อยๆ จางหายไปหลังผ่านไป 4 วินาที
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => document.body.removeChild(toast), 500);
@@ -526,9 +584,11 @@
                         cursor.y = indexTip.y;
                         
                         const distToMidTip = Math.sqrt(Math.pow(middleTip.x - wrist.x, 2) + Math.pow(middleTip.y - wrist.y, 2));
+                        // เงื่อนไขการกำมือ
                         const isFist = distToMidTip < (canvasElement.height * 0.25);
 
                         if (isFist && !cursor.wasFist) {
+                            playSFX(sfxLock); // เล่นเสียงล็อกเป้า
                             cursor.isAiming = true; cursor.wasFist = true;
                         } else if (!isFist && cursor.wasFist) {
                             cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); 
