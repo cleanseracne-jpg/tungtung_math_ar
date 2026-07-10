@@ -2,9 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <!-- รองรับการแสดงผลบนมือถืออย่างสมบูรณ์แบบ -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TungTung Math AR (ศึกทุงทุง ปาไม้ทายสูตรคูณ)</title>
+    <title>Loggy Math AR (ศึกน้องล็อกกี้ ปาไม้ทายสูตรคูณ)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -22,54 +21,34 @@
         /* บังคับสัดส่วน 16:9 ให้เกมไม่บีบแบน */
         .game-container {
             aspect-ratio: 16 / 9;
-            max-height: 100vh;
+            max-height: 100dvh; /* เปลี่ยนจาก 100vh เป็น 100dvh แก้แถบเบราว์เซอร์บังในมือถือ */
             max-width: 100vw;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white font-sans overflow-hidden select-none w-screen h-screen flex items-center justify-center">
+<body class="bg-slate-900 text-white font-sans overflow-hidden select-none w-screen h-[100dvh] flex items-center justify-center">
 
     <video id="webcam" class="hidden" autoplay playsinline></video>
 
+    <!-- หน้าแรก: เปลี่ยนข้อความออก เหลือแค่ปุ่ม และปรับตำแหน่งให้อยู่ตรงป้ายไม้ -->
     <div id="start-screen" class="absolute inset-0 z-50 bg-cover bg-center bg-no-repeat" style="background-image: url('images/bg-start.png'); background-color: #f97316;">
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                    md:top-[53%] md:left-[23%] w-[90%] max-w-md md:w-[32vw] md:max-w-none 
-                    p-6 md:p-3 lg:p-6 text-center 
-                    bg-black/70 md:bg-transparent border-2 border-white/50 md:border-none 
-                    rounded-3xl backdrop-blur-md md:backdrop-blur-none shadow-2xl md:shadow-none">
-            
-            <h1 class="text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-2 lg:mb-3 
-                       drop-shadow-lg md:drop-shadow-none text-yellow-300 md:text-amber-950" style="line-height: 1.1;">
-                TungTung<br>Math AR
-            </h1>
-            <p class="text-xl md:text-sm lg:text-lg font-bold mb-4 lg:mb-6 
-                      text-white md:text-amber-900 drop-shadow-md md:drop-shadow-none">
-                ศึกทุงทุง ปาไม้ทายสูตรคูณ
-            </p>
-            
-            <div class="text-left bg-black/60 md:bg-amber-900/10 p-4 lg:p-5 rounded-2xl 
-                        mb-5 lg:mb-6 text-sm md:text-xs lg:text-sm space-y-2 lg:space-y-3 
-                        text-orange-50 md:text-amber-950 border border-white/20 md:border-amber-900/20 font-bold">
-                <p>🎯 <b>ภารกิจ:</b> ปาไม้ใส่แก๊งตัวประหลาดที่ถือคำตอบถูกต้อง</p>
-                <p>⏳ <b>เวลา:</b> มี 20 ข้อ (ปกติ 30 วิ/ข้อ) โบนัส 3 ข้อ (90 วิ)</p>
-                <p>👆 <b>วิธีเล่นแบบใหม่:</b> ใช้มือ (หรือเมาส์) ชี้ไปที่เป้าหมาย แล้วทำท่า <b>"จีบนิ้วเพื่อยิง"</b> (หรือคลิก) ทุงทุงจะปาไม้ไปที่จุดนั้นทันที!</p>
-            </div>
-            
-            <button id="btn-start" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-400 hover:to-orange-400 text-white font-black text-xl lg:text-2xl py-3 lg:py-4 rounded-2xl transition shadow-[0_0_15px_rgba(251,146,60,0.8)] transform hover:scale-105 cursor-pointer">
+        <!-- ใช้ div จัดตำแหน่งปุ่มให้อยู่ในกรอบไม้ซ้ายล่าง (อ้างอิงจากรูปภาพใหม่) -->
+        <div class="absolute w-[80%] md:w-[35%] max-w-md top-[75%] left-1/2 md:top-[70%] md:left-[23%] transform -translate-x-1/2 -translate-y-1/2 text-center">
+            <button id="btn-start" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-400 hover:to-orange-400 text-white font-black text-xl lg:text-2xl py-3 lg:py-4 rounded-2xl transition shadow-[0_0_15px_rgba(251,146,60,0.8)] transform hover:scale-105 cursor-pointer border-2 border-white/50">
                 เข้าสู่เกม (Start)
             </button>
         </div>
     </div>
 
-    <!-- หุ้มกล่องเกมให้อยู่ตรงกลาง และบังคับ 16:9 เสมอ -->
+    <!-- หุ้มกล่องเกมให้อยู่ตรงกลาง และบังคับ 16:9 เสมอ (แก้ไขภาพบีบ) -->
     <div class="relative w-full game-container max-w-6xl mx-auto bg-black rounded-none md:rounded-3xl overflow-hidden shadow-2xl border-0 md:border-4 border-slate-700">
         
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-20"></canvas>
 
-        <!-- UI ชั้นทับ Canvas (ใช้ Flexbox จัดระเบียบ เพื่อให้ยืดหยุ่นตามหน้าจอ) -->
+        <!-- UI ชั้นทับ Canvas -->
         <div class="absolute inset-0 z-30 pointer-events-none flex flex-col justify-between p-2 sm:p-4">
             
-            <!-- แถวบน: สถานะข้อ, คะแนน, และเวลา (ย่ออัตโนมัติบนมือถือ) -->
+            <!-- แถวบน: สถานะข้อ, คะแนน, และเวลา/ขยายจอ -->
             <div class="flex justify-between items-start">
                 <!-- ข้อและคะแนน -->
                 <div class="glass px-2 py-1 sm:px-4 sm:py-2 rounded-xl flex items-center space-x-2 sm:space-x-4">
@@ -84,18 +63,23 @@
                     </div>
                 </div>
 
-                <!-- จับเวลา -->
-                <div class="glass px-2 py-1 sm:px-4 sm:py-2 rounded-xl text-center">
-                    <div class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">เวลาที่เหลือ</div>
-                    <div id="ui-timer" class="text-sm sm:text-xl md:text-2xl font-black text-pink-400">00:30</div>
+                <!-- กลุ่มขวาบน: จับเวลา + ปุ่ม Fullscreen -->
+                <div class="flex space-x-2">
+                    <div class="glass px-2 py-1 sm:px-4 sm:py-2 rounded-xl text-center">
+                        <div class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">เวลาที่เหลือ</div>
+                        <div id="ui-timer" class="text-sm sm:text-xl md:text-2xl font-black text-pink-400">00:30</div>
+                    </div>
+                    <button id="btn-fullscreen" class="glass px-2 py-1 sm:px-3 sm:py-2 rounded-xl flex items-center justify-center text-white pointer-events-auto hover:bg-white/20 transition cursor-pointer shadow-lg" title="เต็มหน้าจอ">
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- แถวล่าง: ป้ายคำถาม (ย้ายมาอยู่ตรงกลางด้านล่าง) -->
-            <div class="flex justify-center mb-2 sm:mb-4">
+            <!-- แถวล่าง: ป้ายคำถาม (ย้ายมาตรงกลางด้านล่างตามที่ขอ) -->
+            <div class="flex justify-center mb-2 sm:mb-8">
                 <div class="relative px-6 py-3 sm:px-12 sm:py-5 text-center min-w-[180px] sm:min-w-[280px] bg-contain bg-center bg-no-repeat drop-shadow-xl" style="background-image: url('images/ui-board.png');">
                     <div class="absolute inset-0 bg-black/30 rounded-xl sm:rounded-2xl -z-10" style="backdrop-filter: blur(2px);"></div>
-                    <div id="ui-math-title" class="text-[10px] sm:text-xs text-yellow-300 font-bold mb-1 drop-shadow-md">แก๊งทุงทุงบุก!</div>
+                    <div id="ui-math-title" class="text-[10px] sm:text-xs text-yellow-300 font-bold mb-1 drop-shadow-md">แก๊งมอนสเตอร์บุก!</div>
                     <div id="ui-math-question" class="text-2xl sm:text-4xl font-black text-white drop-shadow-lg">⌛ โหลด...</div>
                 </div>
             </div>
@@ -143,6 +127,7 @@
         const gameOverScreen = document.getElementById('game-over-screen');
         const btnStart = document.getElementById('btn-start');
         const btnRestart = document.getElementById('btn-restart');
+        const btnFullscreen = document.getElementById('btn-fullscreen');
 
         // โหลดรูปภาพ
         const images = {
@@ -178,16 +163,15 @@
         let isHandDetected = false;
         let isWebcamActive = false; 
 
-        // ปรับตำแหน่งทุงทุงให้ต่ำลงมาอีกให้ชิดขอบจอด้านล่าง (เพิ่ม Y จาก 530 เป็น 620)
+        // ปรับตำแหน่งทุงทุงให้ต่ำลงมาชิดขอบจอ เพื่อให้เล็งเป้าข้างบนได้ง่ายขึ้น
         const tungBase = { x: 600, y: 620 }; 
         let stickObj = { x: 600, y: 620, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
         let targets = []; 
-        let tungThrowAnimTimer = 0; // เวลานับถอยหลังแอ็กชันปาไม้
+        let tungThrowAnimTimer = 0;
 
         function resizeCanvas() {
-            // ระบบภายในล็อคไว้ที่ 1200x675 เสมอ แล้วให้ CSS จัดการย่อขยายเอาเอง (แก้ภาพบีบ 100%)
             canvasElement.width = 1200;
-            canvasElement.height = 675;
+            canvasElement.height = 675; // 16:9 
         }
         resizeCanvas();
 
@@ -246,11 +230,11 @@
                 uiMathTitle.innerText = "🔥 ด่านโบนัส! (300 คะแนน) 🔥";
                 uiMathTitle.classList.replace('text-yellow-300', 'text-pink-400');
             } else {
-                uiMathTitle.innerText = "แก๊งทุงทุงบุก!";
+                uiMathTitle.innerText = "แก๊งมอนสเตอร์บุก!"; // เปลี่ยนชื่อ
                 uiMathTitle.classList.replace('text-pink-400', 'text-yellow-300');
             }
 
-            // ขยับเป้าหมาย (ตัวเลือก) ให้สมดุลกับพื้นที่หน้าจอครึ่งบน
+            // ตำแหน่งเป้าหมายด้านบน
             const positions = [ { x: 300, y: 160 }, { x: 600, y: 160 }, { x: 900, y: 160 } ];
             targets = qData.options.map((opt, i) => {
                 let type = Math.floor(Math.random() * 3) + 1; 
@@ -264,19 +248,17 @@
             resetStick();
         }
 
-        // --- ระบบควบคุมเมาส์และทัชสกรีน (จำลองการกำมือ/แบมือ) ---
-        canvasElement.addEventListener('mousedown', (e) => { if (!isHandDetected) { cursor.isAiming = true; const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
+        canvasElement.addEventListener('mousedown', (e) => { if (!isHandDetected) { cursor.isAiming = true; cursor.wasFist = true; const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
         canvasElement.addEventListener('mousemove', (e) => { if (!isHandDetected) { const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('mouseup', (e) => { if (!isHandDetected && cursor.isAiming) { cursor.isAiming = false; shootStick(cursor); }});
+        canvasElement.addEventListener('mouseup', (e) => { if (!isHandDetected && cursor.wasFist) { cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); }});
         
-        canvasElement.addEventListener('touchstart', (e) => { e.preventDefault(); if (!isHandDetected) { cursor.isAiming = true; const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
+        canvasElement.addEventListener('touchstart', (e) => { e.preventDefault(); if (!isHandDetected) { cursor.isAiming = true; cursor.wasFist = true; const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
         canvasElement.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isHandDetected) { const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('touchend', (e) => { e.preventDefault(); if (!isHandDetected && cursor.isAiming) { cursor.isAiming = false; shootStick(cursor); }});
+        canvasElement.addEventListener('touchend', (e) => { e.preventDefault(); if (!isHandDetected && cursor.wasFist) { cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); }});
 
         function getMousePos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * canvasElement.width, y: (e.clientY - r.top) / r.height * canvasElement.height }; }
         function getTouchPos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.touches[0].clientX - r.left) / r.width * canvasElement.width, y: (e.touches[0].clientY - r.top) / r.height * canvasElement.height }; }
 
-        // ฟังก์ชันสั่งยิงไม้ไปที่เป้าหมาย
         function shootStick(pos) {
             if (!stickObj.isFired && gameState === 'PLAYING') {
                 const dx = pos.x - tungBase.x;
@@ -284,11 +266,11 @@
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 
                 if (dist > 10) { 
-                    const shootSpeed = 35; // ความเร็วไม้พุ่ง
+                    const shootSpeed = 40; 
                     stickObj.vx = (dx / dist) * shootSpeed;
                     stickObj.vy = (dy / dist) * shootSpeed;
                     stickObj.isFired = true;
-                    tungThrowAnimTimer = 15; // แอ็กชันทุงทุง
+                    tungThrowAnimTimer = 15; 
                 }
             }
         }
@@ -297,8 +279,8 @@
             if (stickObj.isFired) {
                 stickObj.x += stickObj.vx; 
                 stickObj.y += stickObj.vy;
-                stickObj.rotation += 0.4; // หมุนติ้วๆ เร็วๆ
-                if (stickObj.scale > 0.2) stickObj.scale -= 0.02; // เล็กลงเมื่อพุ่งลึก
+                stickObj.rotation += 0.4; 
+                if (stickObj.scale > 0.2) stickObj.scale -= 0.02; 
 
                 targets.forEach(target => {
                     if (!target.isHit) {
@@ -309,8 +291,8 @@
                     }
                 });
 
-                if (stickObj.y < -150 || stickObj.x > canvasElement.width + 150 || stickObj.x < -150) {
-                    resetStick(); // บังคับให้ไม้กลับมาที่มือทันทีที่หลุดขอบจอ (แก้บั๊กไม้หาย)
+                if (stickObj.y < -150 || stickObj.x > canvasElement.width + 150 || stickObj.x < -150 || stickObj.y > canvasElement.height + 150) {
+                    resetStick();
                 }
             }
             if (tungThrowAnimTimer > 0) tungThrowAnimTimer--;
@@ -321,10 +303,7 @@
                 score += isBonusRound ? 300 : 100; uiScore.innerText = score;
                 setTimeout(() => { if (gameState === 'PLAYING') loadQuestion(currentQuestionIdx + 1); }, 1200);
             } else {
-                // ปาผิด หัก 100 คะแนน
                 score -= 100; uiScore.innerText = score;
-                
-                // สั่งให้ไม้กลับมาที่มือทันทีเพื่อให้เด็กปาซ้ำได้ ไม่ต้องรอ
                 setTimeout(() => { if (gameState === 'PLAYING' && !targets.some(t => t.isCorrect && t.isHit)) resetStick(); }, 300);
             }
         }
@@ -334,7 +313,6 @@
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             const time = Date.now(); 
 
-            // 1. พื้นหลัง
             if (isWebcamActive) {
                 ctx.save(); ctx.translate(canvasElement.width, 0); ctx.scale(-1, 1);
                 ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height); ctx.restore();
@@ -345,18 +323,15 @@
             }
 
             if (gameState === 'PLAYING') {
-                
-                // 2. เส้นเล็งเลเซอร์ (Laser Sight)
-                if (!stickObj.isFired) {
+                if (cursor.isAiming && !stickObj.isFired) {
                     ctx.beginPath(); ctx.moveTo(tungBase.x, tungBase.y); ctx.lineTo(cursor.x, cursor.y);
                     ctx.setLineDash([15, 10]); 
                     let lineGrad = ctx.createLinearGradient(tungBase.x, tungBase.y, cursor.x, cursor.y);
                     lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)'); 
-                    lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0.8)');
-                    ctx.strokeStyle = lineGrad; ctx.lineWidth = 4; ctx.stroke(); ctx.setLineDash([]);
+                    lineGrad.addColorStop(1, 'rgba(255, 100, 100, 0.8)');
+                    ctx.strokeStyle = lineGrad; ctx.lineWidth = 6; ctx.stroke(); ctx.setLineDash([]);
                 }
 
-                // 3. วาดเป้าหมายทุงทุง
                 targets.forEach(target => {
                     const floatX = Math.cos((time * 0.002) + target.floatOffset) * 10;
                     const floatY = Math.sin((time * 0.003) + target.floatOffset) * 12;
@@ -369,17 +344,13 @@
                         target.hitScale += 0.025; 
                         target.hitAlpha -= 0.03; 
                         if (target.hitAlpha < 0) target.hitAlpha = 0;
-
-                        ctx.globalAlpha = target.hitAlpha;
-                        ctx.scale(target.hitScale, target.hitScale);
+                        ctx.globalAlpha = target.hitAlpha; ctx.scale(target.hitScale, target.hitScale);
                         try { ctx.drawImage(target.isCorrect ? images.correct : images.wrong, -target.r*2, -target.r*2, target.r*4, target.r*4); } catch(e) {}
                     } else {
                         let tImg = images.target1;
                         if (target.type === 2) tImg = images.target2;
                         if (target.type === 3) tImg = images.target3;
-
                         ctx.rotate(Math.sin((time * 0.002) + target.floatOffset) * 0.08);
-
                         try {
                             ctx.drawImage(tImg, -target.r*1.8, -target.r*1.8, target.r*3.6, target.r*3.6);
                             ctx.drawImage(images.badge, -50, -target.r - 45, 100, 50);
@@ -391,28 +362,17 @@
                     ctx.restore();
                 });
 
-                // 4. วาดทุงทุง (คนปา)
                 ctx.save();
                 ctx.translate(tungBase.x, tungBase.y); 
-                
-                let scaleX = 1 + Math.sin(time * 0.003) * 0.02; // หายใจปกติ
+                let scaleX = 1 + Math.sin(time * 0.003) * 0.02; 
                 let scaleY = 1 + Math.cos(time * 0.003) * 0.03; 
-
-                // แอนิเมชันตอนยิง (เด้งยืดตัวขึ้น)
-                if (tungThrowAnimTimer > 0) {
-                    scaleY += 0.15; // ยืดตัว
-                    scaleX -= 0.1; // ผอมลง
-                }
-                
+                if (tungThrowAnimTimer > 0) { scaleY += 0.15; scaleX -= 0.1; }
                 ctx.scale(scaleX, scaleY);
                 try { ctx.drawImage(images.main, -120, -220, 240, 240); } catch(e) {}
                 ctx.restore();
 
-                // 5. วาดท่อนไม้
-                if (stickObj.isFired || true) { // วาดเสมอ ถ้าไม่ได้ยิงจะอยู่ที่ทุงทุง
-                    ctx.save();
-                    ctx.translate(stickObj.x, stickObj.y);
-                    ctx.rotate(stickObj.rotation);
+                if (stickObj.isFired || true) { 
+                    ctx.save(); ctx.translate(stickObj.x, stickObj.y); ctx.rotate(stickObj.rotation);
                     try {
                         const sSize = stickObj.r * 2.5 * stickObj.scale;
                         ctx.drawImage(images.stick, -sSize/2, -sSize/2, sSize, sSize);
@@ -420,19 +380,13 @@
                     ctx.restore();
                 }
 
-                // 6. วาดเคอร์เซอร์ระบบ AR 
-                if (isHandDetected || !isHandDetected) { // วาดเสมอเพื่อให้รู้ว่าเมาส์อยู่ไหน
+                if (isHandDetected || !isHandDetected) { 
                     try {
                         ctx.globalAlpha = cursor.isAiming ? 1.0 : 0.6;
                         ctx.drawImage(images.cursor, cursor.x - 25, cursor.y - 25, 50, 50);
-                        
-                        // วงแหวนสีแดง แจ้งเตือนสถานะ "กำมืออยู่ (กำลังเล็ง)"
                         if (cursor.isAiming) {
-                            ctx.beginPath();
-                            ctx.arc(cursor.x, cursor.y, 40, 0, Math.PI * 2);
-                            ctx.strokeStyle = '#ef4444'; // สีแดง
-                            ctx.lineWidth = 4;
-                            ctx.stroke();
+                            ctx.beginPath(); ctx.arc(cursor.x, cursor.y, 40, 0, Math.PI * 2);
+                            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4; ctx.stroke();
                         }
                         ctx.globalAlpha = 1.0;
                     } catch(e) {}
@@ -462,7 +416,7 @@
 
             if (isClear) {
                 titleEl.innerText = "ALL CLEAR! 🎉";
-                subEl.innerText = "ชนะระดับเทพ! แก๊งทุงทุงยอมแพ้แล้ว!";
+                subEl.innerText = "ชนะระดับเทพ! แก๊งมอนสเตอร์ยอมแพ้แล้ว!";
                 gameOverScreen.style.backgroundImage = "url('images/bg-victory.png')";
             } else {
                 titleEl.innerText = "TIME'S UP ⏳";
@@ -488,9 +442,24 @@
             questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
+        btnFullscreen.addEventListener('click', () => {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) { 
+                    document.documentElement.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { 
+                    document.webkitExitFullscreen();
+                }
+            }
+        });
+
         let currentStream = null;
 
-        // ฟังก์ชันสำคัญ: เคลียร์การเชื่อมต่อกล้องตอนปิด/รีเฟรชหน้าเว็บ เพื่อป้องกันปัญหากล้องค้าง!
         window.addEventListener('beforeunload', () => {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
@@ -501,27 +470,21 @@
             statusText.innerText = "กำลังขออนุญาตเปิดกล้อง... (กรุณากด Allow)";
             
             try {
-                // 1. จัดการเปิดกล้องด้วยตัวเอง (เสถียรกว่า และแก้ปัญหารีเฟรชแล้วกล้องไม่มา)
                 currentStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } 
                 });
                 videoElement.srcObject = currentStream;
                 
-                // รอจนกว่าวิดีโอจะพร้อมเล่นจริงๆ
                 await new Promise((resolve) => {
-                    videoElement.onloadedmetadata = () => {
-                        videoElement.play().then(resolve);
-                    };
+                    videoElement.onloadedmetadata = () => { videoElement.play().then(resolve); };
                 });
 
                 isWebcamActive = true;
-                statusText.innerText = "เปิดกล้องสำเร็จ! กำลังโหลด AI วิเคราะห์มือ... (รอสักครู่)";
+                statusText.innerText = "เปิดกล้องสำเร็จ! กำลังโหลด AI วิเคราะห์มือ...";
 
-                // 2. โหลดโมเดล MediaPipe Hands
                 const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
                 hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
                 
-                // บังคับให้ AI โหลดให้เสร็จก่อนเริ่มรับภาพ (แก้บั๊กจอดำ)
                 await hands.initialize();
                 
                 hands.onResults((results) => {
@@ -530,30 +493,20 @@
                         statusText.innerText = "เชื่อมต่อระบบ AR Hand Tracking เรียบร้อย 🖐️";
                         
                         const lm = results.multiHandLandmarks[0];
-                        
-                        // ใช้นิ้วชี้เป็นพิกัดเล็งเป้าหมาย (Cursor)
                         const indexTip = { x: (1 - lm[8].x) * canvasElement.width, y: lm[8].y * canvasElement.height };
-                        
-                        // พิกัดข้อมือและปลายนิ้วกลาง เพื่อคำนวณระยะการ "กำมือ"
                         const wrist = { x: (1 - lm[0].x) * canvasElement.width, y: lm[0].y * canvasElement.height };
                         const middleTip = { x: (1 - lm[12].x) * canvasElement.width, y: lm[12].y * canvasElement.height };
                         
                         cursor.x = indexTip.x; 
                         cursor.y = indexTip.y;
                         
-                        // คำนวณระยะห่างระหว่างข้อมือกับปลายนิ้วกลาง
                         const distToMidTip = Math.sqrt(Math.pow(middleTip.x - wrist.x, 2) + Math.pow(middleTip.y - wrist.y, 2));
-                        
-                        // กำมือ (Fist) 
                         const isFist = distToMidTip < (canvasElement.height * 0.25);
 
                         if (isFist && !cursor.wasFist) {
-                            cursor.isAiming = true;
-                            cursor.wasFist = true;
+                            cursor.isAiming = true; cursor.wasFist = true;
                         } else if (!isFist && cursor.wasFist) {
-                            cursor.isAiming = false;
-                            cursor.wasFist = false;
-                            shootStick(cursor); 
+                            cursor.isAiming = false; cursor.wasFist = false; shootStick(cursor); 
                         }
                     } else {
                         if (isHandDetected) {
@@ -563,31 +516,21 @@
                     }
                 });
 
-                // 3. ป้อนภาพจากกล้องเข้า AI แบบ Manual Loop 
-                // (เสถียรที่สุด ไม่พึ่งพา camera_utils ที่ชอบมีปัญหาตอนรีเฟรช)
                 let lastVideoTime = -1;
                 async function processVideoFrame() {
                     if (videoElement.readyState >= 2 && videoElement.currentTime !== lastVideoTime) {
                         lastVideoTime = videoElement.currentTime;
-                        try {
-                            await hands.send({ image: videoElement });
-                        } catch (err) {
-                            console.error("AI Sync Error:", err);
-                        }
+                        try { await hands.send({ image: videoElement }); } catch (err) {}
                     }
-                    // ทำซ้ำเรื่อยๆ ในรอบถัดไปของการวาดหน้าจอ
                     requestAnimationFrame(processVideoFrame);
                 }
                 processVideoFrame();
 
             } catch(e) {
                 console.error("Camera Init Error:", e);
-                switchToClassicMode("🎮 โหมดปกติ: เข้าถึงกล้องไม่ได้ หรือกล้องถูกใช้โดยแอปอื่น (ใช้เมาส์แทน)");
+                isWebcamActive = false; isHandDetected = false;
+                statusText.innerText = "🎮 โหมดปกติ: เข้าถึงกล้องไม่ได้ (ใช้เมาส์แทน)";
             }
-        }
-
-        function switchToClassicMode(message) {
-            isWebcamActive = false; isHandDetected = false; statusText.innerText = message;
         }
 
         initCamera();
