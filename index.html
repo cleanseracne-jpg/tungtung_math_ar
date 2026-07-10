@@ -488,28 +488,45 @@
             questionsList = generateMathQuestions(); loadQuestion(0); startTimer();
         });
 
+        let currentStream = null;
+
+        // ฟังก์ชันสำคัญ: เคลียร์การเชื่อมต่อกล้องตอนปิด/รีเฟรชหน้าเว็บ เพื่อป้องกันปัญหากล้องค้าง!
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        });
+
         async function initCamera() {
+            statusText.innerText = "กำลังขออนุญาตเปิดกล้อง... (กรุณากด Allow)";
+            
             try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const hasWebcam = devices.some(device => device.kind === 'videoinput');
-                if (!hasWebcam) { switchToClassicMode("🎮 โหมดปกติ: (ไม่พบกล้อง ใช้เมาส์/ทัชแทน)"); return; }
-            } catch (e) { }
+                // 1. จัดการเปิดกล้องด้วยตัวเอง (เสถียรกว่า และแก้ปัญหารีเฟรชแล้วกล้องไม่มา)
+                currentStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } 
+                });
+                videoElement.srcObject = currentStream;
+                
+                // รอจนกว่าวิดีโอจะพร้อมเล่นจริงๆ
+                await new Promise((resolve) => {
+                    videoElement.onloadedmetadata = () => {
+                        videoElement.play().then(resolve);
+                    };
+                });
 
-            let mpTimeout = setTimeout(() => {
-                if (!isWebcamActive) {
-                    statusText.innerText = "⚡ ระบบวิเคราะห์มือโหลดช้า: สลับเข้าสู่โหมดเว็บแคม (ใช้เมาส์เล่น)";
-                    startRawWebcam();
-                }
-            }, 5000);
+                isWebcamActive = true;
+                statusText.innerText = "เปิดกล้องสำเร็จ! กำลังโหลด AI วิเคราะห์มือ... (รอสักครู่)";
 
-            try {
+                // 2. โหลดโมเดล MediaPipe Hands
                 const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
                 hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
                 
+                // บังคับให้ AI โหลดให้เสร็จก่อนเริ่มรับภาพ (แก้บั๊กจอดำ)
+                await hands.initialize();
+                
                 hands.onResults((results) => {
-                    clearTimeout(mpTimeout); 
                     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                        isHandDetected = true; isWebcamActive = true;
+                        isHandDetected = true; 
                         statusText.innerText = "เชื่อมต่อระบบ AR Hand Tracking เรียบร้อย 🖐️";
                         
                         const lm = results.multiHandLandmarks[0];
@@ -527,48 +544,46 @@
                         // คำนวณระยะห่างระหว่างข้อมือกับปลายนิ้วกลาง
                         const distToMidTip = Math.sqrt(Math.pow(middleTip.x - wrist.x, 2) + Math.pow(middleTip.y - wrist.y, 2));
                         
-                        // ถ้าปลายนิ้วกลางอยู่ใกล้ข้อมือ (ระยะน้อย) แสดงว่า "กำมือ (Fist)"
+                        // กำมือ (Fist) 
                         const isFist = distToMidTip < (canvasElement.height * 0.25);
 
                         if (isFist && !cursor.wasFist) {
-                            // เริ่มกำมือ = เข้าสู่สถานะ เล็งเป้า (Aim)
                             cursor.isAiming = true;
                             cursor.wasFist = true;
                         } else if (!isFist && cursor.wasFist) {
-                            // แบมือออก = เข้าสู่สถานะ ปาไม้ (Shoot)
                             cursor.isAiming = false;
                             cursor.wasFist = false;
-                            shootStick(cursor); // ปาไม้ไปที่ตำแหน่งนิ้วชี้
+                            shootStick(cursor); 
                         }
                     } else {
                         if (isHandDetected) {
                             isHandDetected = false; cursor.isAiming = false; cursor.wasFist = false;
-                            statusText.innerText = "กำลังหามือของคุณ... (คุณสามารถใช้เมาส์คลิกเพื่อเล่นแทนได้)";
+                            statusText.innerText = "กำลังหามือของคุณ... (ใช้เมาส์คลิกเพื่อเล่นแทนได้)";
                         }
                     }
                 });
 
-                // เริ่มต้นการดึงภาพจากกล้องส่งไปให้ Mediapipe
-                const camera = new Camera(videoElement, {
-                    onFrame: async () => {
-                        await hands.send({image: videoElement});
-                    },
-                    width: 1280,
-                    height: 720
-                });
-                camera.start();
+                // 3. ป้อนภาพจากกล้องเข้า AI แบบ Manual Loop 
+                // (เสถียรที่สุด ไม่พึ่งพา camera_utils ที่ชอบมีปัญหาตอนรีเฟรช)
+                let lastVideoTime = -1;
+                async function processVideoFrame() {
+                    if (videoElement.readyState >= 2 && videoElement.currentTime !== lastVideoTime) {
+                        lastVideoTime = videoElement.currentTime;
+                        try {
+                            await hands.send({ image: videoElement });
+                        } catch (err) {
+                            console.error("AI Sync Error:", err);
+                        }
+                    }
+                    // ทำซ้ำเรื่อยๆ ในรอบถัดไปของการวาดหน้าจอ
+                    requestAnimationFrame(processVideoFrame);
+                }
+                processVideoFrame();
 
             } catch(e) {
-                // หาก AI มีปัญหา ให้สลับไปใช้กล้องธรรมดา
-                startRawWebcam();
+                console.error("Camera Init Error:", e);
+                switchToClassicMode("🎮 โหมดปกติ: เข้าถึงกล้องไม่ได้ หรือกล้องถูกใช้โดยแอปอื่น (ใช้เมาส์แทน)");
             }
-        }
-
-        // ฟังก์ชันเปิดกล้องธรรมดา (กรณีโหลดโมเดล AI ไม่สำเร็จ)
-        function startRawWebcam() {
-            navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } })
-                .then((stream) => { videoElement.srcObject = stream; isWebcamActive = true; statusText.innerText = "🎮 โหมดเมาส์บนกล้องจริง: พร้อมใช้งาน"; })
-                .catch((err) => { switchToClassicMode("🎮 โหมดปกติ: บอร์ดเกมพร้อมใช้งาน (เข้าถึงกล้องไม่ได้ ใช้ฉากจำลอง)"); });
         }
 
         function switchToClassicMode(message) {
