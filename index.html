@@ -178,9 +178,9 @@
         let isHandDetected = false;
         let isWebcamActive = false; 
 
-        // ปรับตำแหน่งทุงทุงให้ต่ำลงมา มีพื้นที่ข้างบนให้เล็งได้เต็มที่
-        const tungBase = { x: 600, y: 530 }; 
-        let stickObj = { x: 600, y: 530, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
+        // ปรับตำแหน่งทุงทุงให้ต่ำลงมาอีกให้ชิดขอบจอด้านล่าง (เพิ่ม Y จาก 530 เป็น 620)
+        const tungBase = { x: 600, y: 620 }; 
+        let stickObj = { x: 600, y: 620, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
         let targets = []; 
         let tungThrowAnimTimer = 0; // เวลานับถอยหลังแอ็กชันปาไม้
 
