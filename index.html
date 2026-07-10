@@ -174,13 +174,13 @@
         let totalTimeSpent = 0;
         let isBonusRound = false;
 
-        let cursor = { x: 600, y: 337, isPinching: false, state: 'NORMAL' };
+        let cursor = { x: 600, y: 337, isAiming: false, wasFist: false };
         let isHandDetected = false;
         let isWebcamActive = false; 
 
-        // ปรับตำแหน่งทุงทุงให้สูงขึ้นหนีป้ายด้านล่าง (จาก 480 เป็น 420)
-        const tungBase = { x: 600, y: 420 }; 
-        let stickObj = { x: 600, y: 420, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
+        // ปรับตำแหน่งทุงทุงให้ต่ำลงมา มีพื้นที่ข้างบนให้เล็งได้เต็มที่
+        const tungBase = { x: 600, y: 530 }; 
+        let stickObj = { x: 600, y: 530, r: 40, vx: 0, vy: 0, isFired: false, scale: 1, rotation: 0 };
         let targets = []; 
         let tungThrowAnimTimer = 0; // เวลานับถอยหลังแอ็กชันปาไม้
 
@@ -264,32 +264,33 @@
             resetStick();
         }
 
-        let isMouseDown = false;
-        canvasElement.addEventListener('mousedown', (e) => { if (!isHandDetected) { handlePointerDown(getMousePos(e)); }});
+        // --- ระบบควบคุมเมาส์และทัชสกรีน (จำลองการกำมือ/แบมือ) ---
+        canvasElement.addEventListener('mousedown', (e) => { if (!isHandDetected) { cursor.isAiming = true; const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
         canvasElement.addEventListener('mousemove', (e) => { if (!isHandDetected) { const p = getMousePos(e); cursor.x=p.x; cursor.y=p.y; }});
-        canvasElement.addEventListener('touchstart', (e) => { e.preventDefault(); if (!isHandDetected) { handlePointerDown(getTouchPos(e)); }});
+        canvasElement.addEventListener('mouseup', (e) => { if (!isHandDetected && cursor.isAiming) { cursor.isAiming = false; shootStick(cursor); }});
+        
+        canvasElement.addEventListener('touchstart', (e) => { e.preventDefault(); if (!isHandDetected) { cursor.isAiming = true; const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
         canvasElement.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isHandDetected) { const p = getTouchPos(e); cursor.x=p.x; cursor.y=p.y; }});
+        canvasElement.addEventListener('touchend', (e) => { e.preventDefault(); if (!isHandDetected && cursor.isAiming) { cursor.isAiming = false; shootStick(cursor); }});
 
         function getMousePos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * canvasElement.width, y: (e.clientY - r.top) / r.height * canvasElement.height }; }
         function getTouchPos(e) { const r = canvasElement.getBoundingClientRect(); return { x: (e.touches[0].clientX - r.left) / r.width * canvasElement.width, y: (e.touches[0].clientY - r.top) / r.height * canvasElement.height }; }
 
-        function handlePointerDown(pos) {
-            cursor.isPinching = true;
-            // ถ้ายืนยันตำแหน่งแล้ว ให้ยิงไม้พุ่งไปยังจุดที่ชี้!
+        // ฟังก์ชันสั่งยิงไม้ไปที่เป้าหมาย
+        function shootStick(pos) {
             if (!stickObj.isFired && gameState === 'PLAYING') {
                 const dx = pos.x - tungBase.x;
                 const dy = pos.y - tungBase.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 
-                if (dist > 10) { // ป้องกันการยิงใส่ตัวเอง
-                    const shootSpeed = 30; // ความเร็วในการพุ่ง
+                if (dist > 10) { 
+                    const shootSpeed = 35; // ความเร็วไม้พุ่ง
                     stickObj.vx = (dx / dist) * shootSpeed;
                     stickObj.vy = (dy / dist) * shootSpeed;
                     stickObj.isFired = true;
-                    tungThrowAnimTimer = 15; // สั่งทุงทุงขยับตัวแอ็กชันปาไม้ (15 เฟรม)
+                    tungThrowAnimTimer = 15; // แอ็กชันทุงทุง
                 }
             }
-            setTimeout(() => { cursor.isPinching = false; }, 200); // จำลองการปล่อยนิ้ว
         }
 
         function updatePhysics() {
@@ -309,8 +310,7 @@
                 });
 
                 if (stickObj.y < -150 || stickObj.x > canvasElement.width + 150 || stickObj.x < -150) {
-                    stickObj.isFired = false; 
-                    setTimeout(() => { if (gameState === 'PLAYING') resetStick(); }, 500);
+                    resetStick(); // บังคับให้ไม้กลับมาที่มือทันทีที่หลุดขอบจอ (แก้บั๊กไม้หาย)
                 }
             }
             if (tungThrowAnimTimer > 0) tungThrowAnimTimer--;
@@ -321,7 +321,11 @@
                 score += isBonusRound ? 300 : 100; uiScore.innerText = score;
                 setTimeout(() => { if (gameState === 'PLAYING') loadQuestion(currentQuestionIdx + 1); }, 1200);
             } else {
-                setTimeout(() => { if (gameState === 'PLAYING' && !targets.some(t => t.isCorrect && t.isHit)) resetStick(); }, 1200);
+                // ปาผิด หัก 100 คะแนน
+                score -= 100; uiScore.innerText = score;
+                
+                // สั่งให้ไม้กลับมาที่มือทันทีเพื่อให้เด็กปาซ้ำได้ ไม่ต้องรอ
+                setTimeout(() => { if (gameState === 'PLAYING' && !targets.some(t => t.isCorrect && t.isHit)) resetStick(); }, 300);
             }
         }
         setInterval(updatePhysics, 1000 / 60);
@@ -417,10 +421,19 @@
                 }
 
                 // 6. วาดเคอร์เซอร์ระบบ AR 
-                if (isHandDetected) {
+                if (isHandDetected || !isHandDetected) { // วาดเสมอเพื่อให้รู้ว่าเมาส์อยู่ไหน
                     try {
-                        ctx.globalAlpha = cursor.isPinching ? 1.0 : 0.7;
+                        ctx.globalAlpha = cursor.isAiming ? 1.0 : 0.6;
                         ctx.drawImage(images.cursor, cursor.x - 25, cursor.y - 25, 50, 50);
+                        
+                        // วงแหวนสีแดง แจ้งเตือนสถานะ "กำมืออยู่ (กำลังเล็ง)"
+                        if (cursor.isAiming) {
+                            ctx.beginPath();
+                            ctx.arc(cursor.x, cursor.y, 40, 0, Math.PI * 2);
+                            ctx.strokeStyle = '#ef4444'; // สีแดง
+                            ctx.lineWidth = 4;
+                            ctx.stroke();
+                        }
                         ctx.globalAlpha = 1.0;
                     } catch(e) {}
                 }
@@ -500,36 +513,58 @@
                         statusText.innerText = "เชื่อมต่อระบบ AR Hand Tracking เรียบร้อย 🖐️";
                         
                         const lm = results.multiHandLandmarks[0];
-                        // ใช้นิ้วชี้เป็นตัวเล็งเป้า (Aim)
+                        
+                        // ใช้นิ้วชี้เป็นพิกัดเล็งเป้าหมาย (Cursor)
                         const indexTip = { x: (1 - lm[8].x) * canvasElement.width, y: lm[8].y * canvasElement.height };
-                        const thumbTip = { x: (1 - lm[4].x) * canvasElement.width, y: lm[4].y * canvasElement.height };
                         
-                        cursor.x = indexTip.x; cursor.y = indexTip.y;
+                        // พิกัดข้อมือและปลายนิ้วกลาง เพื่อคำนวณระยะการ "กำมือ"
+                        const wrist = { x: (1 - lm[0].x) * canvasElement.width, y: lm[0].y * canvasElement.height };
+                        const middleTip = { x: (1 - lm[12].x) * canvasElement.width, y: lm[12].y * canvasElement.height };
                         
-                        // วัดระยะนิ้วโป้งกับนิ้วชี้ ถ้าแตะกัน (จีบ) ให้ยิง!
-                        const dist = Math.sqrt(Math.pow(indexTip.x - thumbTip.x, 2) + Math.pow(indexTip.y - thumbTip.y, 2));
-                        const isPinch = dist < 45;
+                        cursor.x = indexTip.x; 
+                        cursor.y = indexTip.y;
+                        
+                        // คำนวณระยะห่างระหว่างข้อมือกับปลายนิ้วกลาง
+                        const distToMidTip = Math.sqrt(Math.pow(middleTip.x - wrist.x, 2) + Math.pow(middleTip.y - wrist.y, 2));
+                        
+                        // ถ้าปลายนิ้วกลางอยู่ใกล้ข้อมือ (ระยะน้อย) แสดงว่า "กำมือ (Fist)"
+                        const isFist = distToMidTip < (canvasElement.height * 0.25);
 
-                        if (isPinch && !cursor.isPinching) {
-                            handlePointerDown(cursor); // สั่งยิงไปที่พิกัดที่นิ้วชี้อยู่
-                        } else if (!isPinch) {
-                            cursor.isPinching = false;
+                        if (isFist && !cursor.wasFist) {
+                            // เริ่มกำมือ = เข้าสู่สถานะ เล็งเป้า (Aim)
+                            cursor.isAiming = true;
+                            cursor.wasFist = true;
+                        } else if (!isFist && cursor.wasFist) {
+                            // แบมือออก = เข้าสู่สถานะ ปาไม้ (Shoot)
+                            cursor.isAiming = false;
+                            cursor.wasFist = false;
+                            shootStick(cursor); // ปาไม้ไปที่ตำแหน่งนิ้วชี้
                         }
                     } else {
                         if (isHandDetected) {
-                            isHandDetected = false; cursor.isPinching = false;
-                            statusText.innerText = "กำลังหามือของคุณ... (คุณสามารถใช้เมาส์คลิกลากเล่นแทนได้)";
+                            isHandDetected = false; cursor.isAiming = false; cursor.wasFist = false;
+                            statusText.innerText = "กำลังหามือของคุณ... (คุณสามารถใช้เมาส์คลิกเพื่อเล่นแทนได้)";
                         }
                     }
                 });
 
-                const camera = new Camera(videoElement, { onFrame: async () => { await hands.send({ image: videoElement }); }, width: 640, height: 360 });
-                await camera.start(); isWebcamActive = true;
-            } catch (err) {
-                clearTimeout(mpTimeout); startRawWebcam(); 
+                // เริ่มต้นการดึงภาพจากกล้องส่งไปให้ Mediapipe
+                const camera = new Camera(videoElement, {
+                    onFrame: async () => {
+                        await hands.send({image: videoElement});
+                    },
+                    width: 1280,
+                    height: 720
+                });
+                camera.start();
+
+            } catch(e) {
+                // หาก AI มีปัญหา ให้สลับไปใช้กล้องธรรมดา
+                startRawWebcam();
             }
         }
 
+        // ฟังก์ชันเปิดกล้องธรรมดา (กรณีโหลดโมเดล AI ไม่สำเร็จ)
         function startRawWebcam() {
             navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } })
                 .then((stream) => { videoElement.srcObject = stream; isWebcamActive = true; statusText.innerText = "🎮 โหมดเมาส์บนกล้องจริง: พร้อมใช้งาน"; })
